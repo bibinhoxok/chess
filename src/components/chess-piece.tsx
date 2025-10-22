@@ -1,4 +1,6 @@
+import useChessboard from "@/lib/store/useChessboard"
 import { PieceName, Piece } from "@/lib/types/main"
+import { motion } from "motion/react"
 import { CSSProperties } from "react"
 
 // The order of pieces in the sprite sheet
@@ -31,9 +33,12 @@ type ChessPieceProps = {
     scaledSquareSize: number
     scale: number
     isSelected: boolean
+    onDrop: (piece: Piece, event: MouseEvent | TouchEvent | PointerEvent) => void
 }
 
-const ChessPiece = ({ piece, scaledSquareSize, scale, isSelected }: ChessPieceProps) => (
+const ChessPiece = ({ piece, scaledSquareSize, scale, isSelected, onDrop }: ChessPieceProps) =>{ 
+    const { selectPiece } = useChessboard()
+    return(
     <div
         className="relative flex items-center justify-center"
         style={{
@@ -42,26 +47,32 @@ const ChessPiece = ({ piece, scaledSquareSize, scale, isSelected }: ChessPiecePr
         }}
     >
         {piece && (
-            <>
-                <div
+                <motion.div 
+                    drag
+                    dragMomentum={false}
+                    onDragStart={()=>selectPiece(piece)}
+                    onDragEnd={(event, info) => {
+                        onDrop(piece, event as MouseEvent | TouchEvent | PointerEvent)
+                    }}
+                    initial={{ scale }}
+                    transition={{ duration: 0.1 }}
+                    dragSnapToOrigin
                     className="origin-center"
                     style={{
                         ...offsetSpriteSheet(piece.name, piece.color === "black" ? spriteSheet.black : spriteSheet.white),
-                        transform: `scale(${scale})`,
                     }}
-                />
+                >
                 {isSelected && (
                     <div
                         className="origin-center absolute"
                         style={{
                             ...offsetSpriteSheet(piece.name, spriteSheet.hightlight),
-                            transform: `scale(${scale})`,
                         }}
                     />
                 )}
-            </>
+                </motion.div>
         )}
     </div>
-)
+)}
 
 export default ChessPiece
