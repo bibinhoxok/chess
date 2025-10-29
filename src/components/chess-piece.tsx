@@ -51,7 +51,7 @@ const ChessPiece = ({ piece, scaledSquareSize, scale, isSelected, onDrop }: Ches
                     drag
                     dragMomentum={false}
                     onDragStart={()=>selectPiece(piece)}
-                    onDragEnd={(event, info) => {
+                    onDragEnd={(event) => {
                         onDrop(piece, event as MouseEvent | TouchEvent | PointerEvent)
                     }}
                     initial={{ scale }}

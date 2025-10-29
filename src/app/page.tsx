@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef } from 'react';
 import Chessboard from '../components/chess-board';
+import { Word } from '@/components/letter';
 
 
 export default function Home() {
@@ -42,6 +43,7 @@ export default function Home() {
 	return (
 		<main className="flex flex-col justify-center items-center min-h-screen bg-gray-800 gap-8">
 			<Chessboard />
+			<Word word="sad w speed" />
 			<div className="flex gap-4">
 				<button
 					className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
