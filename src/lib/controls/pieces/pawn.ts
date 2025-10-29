@@ -1,6 +1,7 @@
 import { Board, Color, Piece, Square } from "@/lib/types/main"
 import { getPieceAt } from "../utils"
 import { isSquareOnBoard } from "../board/conditions"
+import { isEnPassant } from "../board/specialMoveConditions"
 
 export const getPawnForwardMoves = (color: Color, from: Square, board: Board): Square[] => {
     const oneSquareForward = color === 'white' ? 1 : -1
@@ -44,10 +45,26 @@ export const getPawnCaptureMoves = (color: Color, from: Square, board: Board): S
     })
 }
 
+export const getEnPassantMove = (color: Color, from: Square, board: Board): Square[] => {
+    const forward = color === 'white' ? 1 : -1
+    const captureDirections = [-1, 1]
+    const directions = captureDirections.map(direction => ({ file: direction, rank: forward }))
+    return directions.flatMap(direction => {
+        const to = {
+            file: from.file + direction.file,
+            rank: from.rank + direction.rank
+        }
+        if (!isSquareOnBoard(to)) return []
+        if (isEnPassant(board, getPieceAt(from, board) as Piece, { file: from.file + direction.file, rank: from.rank} as Square)) return [to]
+        return []
+    })
+}
+
 const getPossibleMoves = (color: Color, from: Square, board: Board): Square[] => {
     return [
         ...getPawnForwardMoves(color, from, board),
-        ...getPawnCaptureMoves(color, from, board)
+        ...getPawnCaptureMoves(color, from, board),
+        ...getEnPassantMove(color, from, board)
     ]
 }
 
