@@ -1,7 +1,8 @@
 import useChessboard from "@/lib/store/useChessboard"
 import ChessPiece from "./chess-piece"
-import { Piece, Square } from "@/lib/types/main"
+import { Board, CastlingMove, Piece, PieceMove, Square } from "@/lib/types/main"
 import { useRef } from "react"
+import { getMoveType } from "@/lib/controls/board/specialMoveConditions"
 
 
 // Board scale
@@ -26,6 +27,14 @@ const Chessboard = () => {
 
 
 	const handleDrop = (piece: Piece, event: MouseEvent | TouchEvent | PointerEvent) => {
+		const board: Board = {
+			selectedPiece,
+			possibleMoves,
+			currentPieces,
+			currentPlayer,
+			gameHistory,
+			gameStatus,
+		}
 		if (!boardRef.current) return
 		const boardRect = boardRef.current.getBoundingClientRect()
 
@@ -45,8 +54,39 @@ const Chessboard = () => {
 
 		const file = Math.floor((x - boardScale.scaledBorderSize) / boardScale.scaledSquareSize)
 		const rank = Math.floor((y - boardScale.scaledBorderSize) / boardScale.scaledSquareSize)
-		if (isPossibleMove({ rank, file })) {
-			movePiece(piece.currentSquare, { rank, file })
+		if (selectedPiece && isPossibleMove({ rank, file })) {
+			const from = selectedPiece.currentSquare
+			const to = { rank, file }
+			const pieceMove:  PieceMove = {
+				from,
+				to,
+				piece: selectedPiece
+			}
+			const moveType = getMoveType(board, { from, to, piece } as PieceMove)
+			if (moveType == 'castling') {
+				const kingMove: PieceMove = {
+					from: selectedPiece.currentSquare,
+					to: { rank, file },
+					piece
+				}
+				const rookFile = to.file > from.file ? 7 : 0
+				const rookToFile = to.file > from.file ? 5 : 3
+				const rook = board.currentPieces[from.rank][rookFile] as Piece
+				const rookMove: PieceMove = {
+					from: rook.currentSquare,
+					to: { rank, file: rookToFile },
+					piece: rook
+				}
+				const castlingMove: CastlingMove = {
+					type: moveType,
+					kingMove,
+					rookMove
+				}
+				movePiece(castlingMove)
+			}
+			if (moveType == 'enPassant') {
+				
+			}
 		}
 	}
 
@@ -100,7 +140,7 @@ const Chessboard = () => {
 					})}
 				</div>
 			</div>
-			
+
 			<p className='text-white text-2xl'>{currentPlayer} move.</p>
 		</>
 	)

@@ -1,10 +1,10 @@
-import { Board, Piece, Square } from "@/lib/types/main"
+import { Board, Piece, PieceMove, Square } from "@/lib/types/main"
 import { isSquareThreatened } from "./conditions"
 
 
 export const isCastling = (board: Board, kingPiece: Piece, rookPiece: Piece) => {
 	// 1. Check if the king or the rook have moved before.
-	if (board.gameHistory.some(move => move.piece === kingPiece || move.piece === rookPiece)) {
+	if (board.gameHistory.some(move => move.type === 'regular' && (move.piece === kingPiece || move.piece === rookPiece))) {
 		return false
 	}
 
@@ -44,6 +44,10 @@ export const isEnPassant = (board: Board, pawn: Piece, capturedSquare: Square) =
 	}
 
 	const lastMove = board.gameHistory[board.gameHistory.length - 1]
+	if (lastMove.type !== 'regular') {
+		return false
+	}
+
 	const capturedPiece = board.currentPieces[capturedSquare.rank][capturedSquare.file]
 
 	// 1. The captured piece must be a pawn of the opposite color.
@@ -70,4 +74,40 @@ export const isEnPassant = (board: Board, pawn: Piece, capturedSquare: Square) =
 	return true
 }
 
-const promotion = () => { }
+export const isPromotion = (pawn: Piece) => {
+	if (pawn.color === 'white' && pawn.currentSquare.rank === 7)
+		return true
+	if (pawn.color === 'black' && pawn.currentSquare.rank === 0)
+		return true
+	return false
+ }
+ 
+export const getMoveType = (board: Board, pieceMove: PieceMove): "regular" | "promotion" | "castling" | "enPassant" => {
+	const { piece, from, to } = pieceMove
+	
+	if (piece.name === "king" && Math.abs(from.file - to.file) === 2) {
+		const rookFile = to.file > from.file ? 7 : 0
+		const rook = board.currentPieces[from.rank][rookFile]
+		if (rook && rook.name === "rook" && isCastling(board, piece, rook)) {
+			return "castling"
+		}
+	}
+
+	if (piece.name === "pawn") {
+		if (isPromotion(piece)) {
+			return "promotion"
+		}
+		
+		const isDiagonal = from.file !== to.file
+		const isMovingToEmptySquare = !board.currentPieces[to.rank][to.file]
+
+		if (isDiagonal && isMovingToEmptySquare) {
+			const capturedPawnSquare = { rank: from.rank, file: to.file }
+			if (isEnPassant(board, piece, capturedPawnSquare)) {
+				return "enPassant"
+			}
+		}
+	}
+
+	return "regular"
+}

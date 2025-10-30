@@ -1,47 +1,66 @@
-import { Square, Board, Piece, Move, Color } from "@/lib/types/main";
-import { getPieceAt } from "../utils";
-import { isValidMove } from "./conditions";
+import { Board, Piece, Move, RegularMove, PromotionMove, PieceMove, CastlingMove, EnPassantMove } from "@/lib/types/main";
 
-
-
-export const movePiece = (from: Square, to: Square, board: Board): Board => {
-    const pieceToMove = getPieceAt(from, board);
-    
-    //Check if a piece exists at the 'from' square and if the move is valid
-    if (!pieceToMove || !isValidMove(pieceToMove.getPossibleMoves, pieceToMove.color, from, board, to) || pieceToMove.color !== board.currentPlayer) {
-        return board; // Return original board if move is invalid
-    }
-
+const createNewCurrentPieces = (board: Board, pieceMoves: PieceMove[], promotePiece?: Piece) => {
     //Create a deep copy of the pieces array to ensure immutability
     const newPieces = board.currentPieces.map(row => [...row]);
 
-    //Get the captured piece, if any
-    const capturedPiece = getPieceAt(to, board);
-
-    //Update the piece's internal state with the new square
-    const movedPiece: Piece = {
-        ...pieceToMove,
-        currentSquare: to
-    };
-
-    //Update the board array
-    newPieces[to.rank][to.file] = movedPiece;
-    newPieces[from.rank][from.file] = null;
-
-    //Create the move object for the history
-    const move: Move = {
-        from,
-        to,
-        piece: movedPiece,
-        capturedPiece: capturedPiece || undefined,
-        specialMoveType: 'none'
-    }
+    pieceMoves.forEach(pieceMove => {
+        //Update the piece's internal state with the new square
+        let movedPiece: Piece = {
+            ...pieceMove.piece,
+            currentSquare: pieceMove.to
+        };
+        if (promotePiece) {
+            movedPiece.name = promotePiece.name
+            movedPiece.value = promotePiece.value
+        }
+        //Update the board array
+        newPieces[pieceMove.to.rank][pieceMove.to.file] = movedPiece;
+        newPieces[pieceMove.from.rank][pieceMove.from.file] = null;
+    })
 
     //Return the new board state
-    return {
-        ...board,
-        currentPieces: newPieces,
-        currentPlayer: board.currentPlayer === 'white' ? 'black' : 'white',
-        gameHistory: [...board.gameHistory, move]
-    };
+    return newPieces
+}
+
+const regularMove = (board: Board, move: RegularMove): Board => ({
+    ...board,
+    currentPieces: createNewCurrentPieces(board, [move]),
+    currentPlayer: board.currentPlayer === 'white' ? 'black' : 'white',
+    gameHistory: [...board.gameHistory, move]
+})
+
+const promotionMove = (board: Board, move: PromotionMove): Board => ({
+    ...board,
+    currentPieces: createNewCurrentPieces(board, [move], move.promotionTo),
+    currentPlayer: board.currentPlayer === 'white' ? 'black' : 'white',
+    gameHistory: [...board.gameHistory, move]
+})
+const castlingMove = (board: Board, move: CastlingMove): Board => ({
+    ...board,
+    currentPieces: createNewCurrentPieces(board, [move.kingMove, move.rookMove]),
+    currentPlayer: board.currentPlayer === 'white' ? 'black' : 'white',
+    gameHistory: [...board.gameHistory, move]
+})
+
+const enPassantMove = (board: Board, move: EnPassantMove): Board => ({
+    ...board,
+    //Move the captured piece to the destination first, then the pawn move and capture it
+    currentPieces: createNewCurrentPieces(board, [{ from: move.capturedPiece.currentSquare, to: move.to, piece: move.piece } as PieceMove, move]), 
+    currentPlayer: board.currentPlayer === 'white' ? 'black' : 'white',
+    gameHistory: [...board.gameHistory, move]
+})
+
+export const movePiece = (board: Board, move: Move): Board => {
+    const moves = {
+        'regular': () => regularMove(board, move as RegularMove),
+        'promotion': () => promotionMove(board, move as PromotionMove),
+        'castling': () => castlingMove(board, move as CastlingMove),
+        'enPassant': () => enPassantMove(board, move as EnPassantMove)
+    }
+    return moves[move.type]();
+}
+
+export const undoMove = (board: Board): Board => {
+    return board
 }

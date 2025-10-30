@@ -1,10 +1,10 @@
 import { create } from 'zustand'
-import { Board, Square, Piece } from '@/lib/types/main'
+import { Board, Square, Piece, Move } from '@/lib/types/main'
 import { chessBoard } from '@/lib/controls/board/chessBoard'
 import { movePiece } from '../controls/board/moves'
 
 type BoardState = Board & {
-	movePiece: (from: Square, to: Square) => void
+	movePiece: (move: Move) => void
 	setBoard: (board: Board) => void
 	selectPiece: (piece: Piece) => void
 }
@@ -12,7 +12,7 @@ type BoardState = Board & {
 const useChessboard = create<BoardState>((set) => ({
 	...chessBoard(),
 	setBoard: (board: Board) => set(board),
-	movePiece: (from, to) => set((state) => ({ ...movePiece(from, to, state), selectedPiece: null })),
+	movePiece: (move) => set((state) => ({ ...movePiece(state, move), selectedPiece: null })),
 	selectPiece: (piece) =>
 		set((state) => {
 			if (state.selectedPiece && state.selectedPiece.currentSquare.rank === piece.currentSquare.rank && state.selectedPiece.currentSquare.file === piece.currentSquare.file) {
