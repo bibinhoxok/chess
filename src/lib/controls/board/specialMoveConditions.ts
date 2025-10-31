@@ -75,9 +75,9 @@ export const isEnPassant = (board: Board, pawn: Piece, capturedSquare: Square) =
 }
 
 export const isPromotion = (pawn: Piece) => {
-	if (pawn.color === 'white' && pawn.currentSquare.rank === 7)
+	if (pawn.color === 'white' && pawn.currentSquare.rank === 6) //This is the position before moving 
 		return true
-	if (pawn.color === 'black' && pawn.currentSquare.rank === 0)
+	if (pawn.color === 'black' && pawn.currentSquare.rank === 1)
 		return true
 	return false
  }

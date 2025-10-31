@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import Chessboard from '../components/chess-board';
 import { Word } from '@/components/letter';
 
