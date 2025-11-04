@@ -7,44 +7,44 @@ import { queen } from "../pieces/queen";
 import { rook } from "../pieces/rook";
 
 const initialPieces = (): (Piece | null)[][] => {
-    const board: (Piece | null)[][] = Array(8).fill(null).map(() => Array(8).fill(null));
+	const board: (Piece | null)[][] = Array(8).fill(null).map(() => Array(8).fill(null));
 
-    // White pieces
-    board[0] = [
-        rook('white', { file: 0, rank: 0 }),
-        knight('white', { file: 1, rank: 0 }),
-        bishop('white', { file: 2, rank: 0 }),
-        queen('white', { file: 3, rank: 0 }),
-        king('white', { file: 4, rank: 0 }),
-        bishop('white', { file: 5, rank: 0 }),
-        knight('white', { file: 6, rank: 0 }),
-        rook('white', { file: 7, rank: 0 }),
-    ];
-    board[1] = Array(8).fill(null).map((_, i) => pawn('white', { file: i, rank: 1 }));
+	// White pieces
+	board[0] = [
+		rook('white', { col: 0, row: 0 }),
+		knight('white', { col: 1, row: 0 }),
+		bishop('white', { col: 2, row: 0 }),
+		queen('white', { col: 3, row: 0 }),
+		king('white', { col: 4, row: 0 }),
+		bishop('white', { col: 5, row: 0 }),
+		knight('white', { col: 6, row: 0 }),
+		rook('white', { col: 7, row: 0 }),
+	];
+	board[1] = Array(8).fill(null).map((_, i) => pawn('white', { col: i, row: 1 }));
 
 
 
-    // Black pieces
-    board[7] = [
-        rook('black', { file: 0, rank: 7 }),
-        knight('black', { file: 1, rank: 7 }),
-        bishop('black', { file: 2, rank: 7 }),
-        queen('black', { file: 3, rank: 7 }),
-        king('black', { file: 4, rank: 7 }),
-        bishop('black', { file: 5, rank: 7 }),
-        knight('black', { file: 6, rank: 7 }),
-        rook('black', { file: 7, rank: 7 }),
-    ];
-    board[6] = Array(8).fill(null).map((_, i) => pawn('black', { file: i, rank: 6 }));
+	// Black pieces
+	board[7] = [
+		rook('black', { col: 0, row: 7 }),
+		knight('black', { col: 1, row: 7 }),
+		bishop('black', { col: 2, row: 7 }),
+		queen('black', { col: 3, row: 7 }),
+		king('black', { col: 4, row: 7 }),
+		bishop('black', { col: 5, row: 7 }),
+		knight('black', { col: 6, row: 7 }),
+		rook('black', { col: 7, row: 7 }),
+	];
+	board[6] = Array(8).fill(null).map((_, i) => pawn('black', { col: i, row: 6 }));
 
-    return board;
+	return board;
 }
 
 export const chessBoard = (): Board => ({
-    currentPieces: initialPieces(),
-    selectedPiece: null,
-    possibleMoves: [],
-    currentPlayer: "white",
-    gameHistory: [],
-    gameStatus: "ongoing"
+	currentPieces: initialPieces(),
+	selectedPiece: null,
+	possibleMoves: [],
+	currentPlayer: "white",
+	gameHistory: [],
+	gameStatus: "ongoing"
 })

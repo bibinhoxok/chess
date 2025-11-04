@@ -15,9 +15,6 @@ const useChessboard = create<BoardState>((set) => ({
 	movePiece: (move) => set((state) => ({ ...movePiece(state, move), selectedPiece: null })),
 	selectPiece: (piece) =>
 		set((state) => {
-			if (state.selectedPiece && state.selectedPiece.currentSquare.rank === piece.currentSquare.rank && state.selectedPiece.currentSquare.file === piece.currentSquare.file) {
-				return { selectedPiece: null, possibleMoves: [] }
-			}
 			const moves = piece.getPossibleMoves(piece.color, piece.currentSquare, state)
 			return { selectedPiece: piece, possibleMoves: moves }
 		}),

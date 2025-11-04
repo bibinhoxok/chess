@@ -3,14 +3,14 @@ import { getSingleMoveInDirection } from "../utils";
 
 const getPossibleMoves = (color: Color, from: Square, board: Board): Square[] => {
     const directions = [
-        { file: 1, rank: 2 },
-        { file: 1, rank: -2 },
-        { file: -1, rank: 2 },
-        { file: -1, rank: -2 },
-        { file: 2, rank: 1 },
-        { file: 2, rank: -1 },
-        { file: -2, rank: 1 },
-        { file: -2, rank: -1 }
+        { col: 1, row: 2 },
+        { col: 1, row: -2 },
+        { col: -1, row: 2 },
+        { col: -1, row: -2 },
+        { col: 2, row: 1 },
+        { col: 2, row: -1 },
+        { col: -2, row: 1 },
+        { col: -2, row: -1 }
     ];
     return directions.flatMap(direction => getSingleMoveInDirection(from, direction, board, color));
 }

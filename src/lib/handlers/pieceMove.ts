@@ -21,12 +21,12 @@ export const handlePieceMove= (
             to,
             piece,
         };
-        const rookFile = to.file > from.file ? 7 : 0;
-        const rookToFile = to.file > from.file ? 5 : 3;
-        const rook = board.currentPieces[from.rank][rookFile] as Piece;
+        const rookCol = to.col > from.col ? 7 : 0;
+        const rookToCol = to.col > from.col ? 5 : 3;
+        const rook = board.currentPieces[from.row][rookCol] as Piece;
         const rookMove: PieceMove = {
             from: rook.currentSquare,
-            to: { rank: from.rank, file: rookToFile },
+            to: { row: from.row, col: rookToCol },
             piece: rook,
         };
         const castlingMove: CastlingMove = {
@@ -37,8 +37,8 @@ export const handlePieceMove= (
         movePiece(castlingMove);
     }
     const handleEnPassantMove = () => {
-        const capturedPawnSquare: Square = { rank: from.rank, file: to.file };
-        const capturedPiece = board.currentPieces[capturedPawnSquare.rank][capturedPawnSquare.file] as Piece;
+        const capturedPawnSquare: Square = { row: from.row, col: to.col };
+        const capturedPiece = board.currentPieces[capturedPawnSquare.row][capturedPawnSquare.col] as Piece;
         const enPassantMove: EnPassantMove = {
             type: 'enPassant',
             from,
@@ -56,7 +56,7 @@ export const handlePieceMove= (
             to,
             piece,
             promotionTo: queen(piece.color, to),// Simplified promotion to queen
-            capturedPiece: board.currentPieces[to.rank][to.file] || undefined,
+            capturedPiece: board.currentPieces[to.row][to.col] || undefined,
         };
         movePiece(promotionMove);
     }
@@ -66,7 +66,7 @@ export const handlePieceMove= (
             from,
             to,
             piece,
-            capturedPiece: board.currentPieces[to.rank][to.file] || undefined,
+            capturedPiece: board.currentPieces[to.row][to.col] || undefined,
         };
         movePiece(regularMove);
     }

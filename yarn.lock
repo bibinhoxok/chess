@@ -524,6 +524,11 @@ lightningcss@1.30.1:
     lightningcss-win32-arm64-msvc "1.30.1"
     lightningcss-win32-x64-msvc "1.30.1"
 
+lodash.debounce@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
+  integrity sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==
+
 magic-string@^0.30.18:
   version "0.30.19"
   resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.19.tgz#cebe9f104e565602e5d2098c5f2e79a77cc86da9"
@@ -713,6 +718,13 @@ undici-types@~6.21.0:
   version "6.21.0"
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.21.0.tgz#691d00af3909be93a7faa13be61b3a5b50ef12cb"
   integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
+
+usehooks-ts@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/usehooks-ts/-/usehooks-ts-3.1.1.tgz#0bb7f38f36f8219ee4509cc5e944ae610fb97656"
+  integrity sha512-I4diPp9Cq6ieSUH2wu+fDAVQO43xwtulo+fKEidHUwZPnYImbtkTjzIJYcDcJqxgmX31GVqNFURodvcgHcW0pA==
+  dependencies:
+    lodash.debounce "^4.0.8"
 
 yallist@^5.0.0:
   version "5.0.0"

@@ -5,22 +5,22 @@ import { isEnPassant,  isPromotion } from "../board/specialMoveConditions"
 
 export const getPawnForwardMoves = (color: Color, from: Square, board: Board): Square[] => {
     const oneSquareForward = color === 'white' ? 1 : -1
-    const startRank = color === 'white' ? 1 : 6
+    const startRow = color === 'white' ? 1 : 6
     const twoSquaresForward = color === 'white' ? 2 : -2
 
-    const directions = startRank === from.rank ? [
-        { file: 0, rank: oneSquareForward },
-        { file: 0, rank: twoSquaresForward }
+    const directions = startRow === from.row ? [
+        { col: 0, row: oneSquareForward },
+        { col: 0, row: twoSquaresForward }
     ] : [
-        { file: 0, rank: oneSquareForward }
+        { col: 0, row: oneSquareForward }
     ]
-    const getMove = (direction: { file: number, rank: number }) => {
+    const getMove = (direction: { col: number, row: number }) => {
         const to = {
-            file: from.file + direction.file,
-            rank: from.rank + direction.rank
+            col: from.col + direction.col,
+            row: from.row + direction.row
         }
         if (!isSquareOnBoard(to)) return []
-        if(direction.rank === twoSquaresForward && getMove({ file: 0, rank: oneSquareForward })?.length === 0) return []
+        if(direction.row === twoSquaresForward && getMove({ col: 0, row: oneSquareForward })?.length === 0) return []
         const pieceAtTarget = getPieceAt(to, board)
         if (pieceAtTarget === null) return [to]
         return []
@@ -31,11 +31,11 @@ export const getPawnForwardMoves = (color: Color, from: Square, board: Board): S
 export const getPawnCaptureMoves = (color: Color, from: Square, board: Board): Square[] => {
     const forward = color === 'white' ? 1 : -1
     const captureDirections = [-1, 1]
-    const directions = captureDirections.map(direction => ({ file: direction, rank: forward }))
+    const directions = captureDirections.map(direction => ({ col: direction, row: forward }))
     return directions.flatMap(direction => {
         const to = {
-            file: from.file + direction.file,
-            rank: from.rank + direction.rank
+            col: from.col + direction.col,
+            row: from.row + direction.row
         }
         if (!isSquareOnBoard(to)) return []
         const pieceAtTarget = getPieceAt(to, board)
@@ -54,14 +54,14 @@ export const getPawnPromoteMoves =  (color: Color, from: Square, board: Board): 
 export const getEnPassantMove = (color: Color, from: Square, board: Board): Square[] => {
     const forward = color === 'white' ? 1 : -1
     const captureDirections = [-1, 1]
-    const directions = captureDirections.map(direction => ({ file: direction, rank: forward }))
+    const directions = captureDirections.map(direction => ({ col: direction, row: forward }))
     return directions.flatMap(direction => {
         const to = {
-            file: from.file + direction.file,
-            rank: from.rank + direction.rank
+            col: from.col + direction.col,
+            row: from.row + direction.row
         }
         if (!isSquareOnBoard(to)) return []
-        if (isEnPassant(board, getPieceAt(from, board) as Piece, { file: from.file + direction.file, rank: from.rank} as Square)) return [to]
+        if (isEnPassant(board, getPieceAt(from, board) as Piece, { col: from.col + direction.col, row: from.row} as Square)) return [to]
         return []
     })
 }

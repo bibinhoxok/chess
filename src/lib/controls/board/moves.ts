@@ -15,8 +15,8 @@ const createNewCurrentPieces = (board: Board, pieceMoves: PieceMove[], promotePi
             movedPiece.value = promotePiece.value
         }
         //Update the board array
-        newPieces[pieceMove.to.rank][pieceMove.to.file] = movedPiece;
-        newPieces[pieceMove.from.rank][pieceMove.from.file] = null;
+        newPieces[pieceMove.to.row][pieceMove.to.col] = movedPiece;
+        newPieces[pieceMove.from.row][pieceMove.from.col] = null;
     })
 
     //Return the new board state

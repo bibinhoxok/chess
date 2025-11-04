@@ -3,14 +3,14 @@ import { getStraightMovesInDirection } from "../utils"
 
 const getPossibleMoves = (color: Color, from: Square, board: Board): Square[] => {
 	const directions = [
-		{ file: 1, rank: 0 },
-		{ file: -1, rank: 0 },
-		{ file: 0, rank: 1 },
-		{ file: 0, rank: -1 },
-		{ file: 1, rank: 1 },
-		{ file: 1, rank: -1 },
-		{ file: -1, rank: 1 },
-		{ file: -1, rank: -1 }
+		{ col: 1, row: 0 },
+		{ col: -1, row: 0 },
+		{ col: 0, row: 1 },
+		{ col: 0, row: -1 },
+		{ col: 1, row: 1 },
+		{ col: 1, row: -1 },
+		{ col: -1, row: 1 },
+		{ col: -1, row: -1 }
 	]
 
 	return directions.flatMap(direction => getStraightMovesInDirection(from, direction, board, color))

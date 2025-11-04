@@ -6,20 +6,20 @@ import { isCastling } from "../board/specialMoveConditions";
 
 const getPossibleMoves = (color: Color, from: Square, board: Board): Square[] => {
     const directions = [
-        { file: 1, rank: 0 },   // Right
-        { file: -1, rank: 0 },  // Left
-        { file: 0, rank: 1 },   // Up
-        { file: 0, rank: -1 },  // Down
-        { file: 1, rank: 1 },   // Up-Right
-        { file: 1, rank: -1 },  // Down-Right
-        { file: -1, rank: 1 },  // Up-Left
-        { file: -1, rank: -1 }  // Down-Left
+        { col: 1, row: 0 },   // Right
+        { col: -1, row: 0 },  // Left
+        { col: 0, row: 1 },   // Up
+        { col: 0, row: -1 },  // Down
+        { col: 1, row: 1 },   // Up-Right
+        { col: 1, row: -1 },  // Down-Right
+        { col: -1, row: 1 },  // Up-Left
+        { col: -1, row: -1 }  // Down-Left
     ];
     const castlingMoves = board.currentPieces.flat().flatMap(piece => {
-        const kingPiece = board.currentPieces[from.rank][from.file];
+        const kingPiece = board.currentPieces[from.row][from.col];
         if (kingPiece && piece && piece.name === 'rook' && piece.color === color && isCastling(board, kingPiece, piece)) {
-            const direction = Math.sign(piece.currentSquare.file - from.file);
-            return [{ rank: from.rank, file: from.file + 2 * direction }];
+            const direction = Math.sign(piece.currentSquare.col - from.col);
+            return [{ row: from.row, col: from.col + 2 * direction }];
         }
         return [];
     });

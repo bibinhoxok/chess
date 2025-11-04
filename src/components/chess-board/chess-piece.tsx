@@ -50,6 +50,7 @@ const ChessPiece = ({ piece, scaledSquareSize, scale, isSelected, onDrop }: Ches
                 <motion.div 
                     drag
                     dragMomentum={false}
+                    onClick={() => selectPiece(piece)}
                     onDragStart={()=>selectPiece(piece)}
                     onDragEnd={(event) => {
                         onDrop(piece, event as MouseEvent | TouchEvent | PointerEvent)

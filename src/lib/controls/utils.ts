@@ -3,14 +3,14 @@ import { isSquareOnBoard } from "./board/conditions"
 
 export const getPieceAt = (square: Square, board: Board): Piece | null => {
     if (!isSquareOnBoard(square)) return null
-    return board.currentPieces[square.rank][square.file]
+    return board.currentPieces[square.row][square.col]
 }
 
-export const getStraightMovesInDirection = (from: Square, direction: { file: number, rank: number }, board: Board, color: Color): Square[] => {
+export const getStraightMovesInDirection = (from: Square, direction: { col: number, row: number }, board: Board, color: Color): Square[] => {
     // Generate all squares in a given direction
     const squaresInDirection = Array.from({ length: 7 }, (_, i) => ({
-        file: from.file + direction.file * (i + 1),
-        rank: from.rank + direction.rank * (i + 1)
+        col: from.col + direction.col * (i + 1),
+        row: from.row + direction.row * (i + 1)
     }))
 
     // Take squares until we go off the board
@@ -35,10 +35,10 @@ export const getStraightMovesInDirection = (from: Square, direction: { file: num
     return moves
 }
 
-export const getSingleMoveInDirection = (from: Square, direction: { file: number, rank: number }, board: Board, color: Color): Square[] => {
+export const getSingleMoveInDirection = (from: Square, direction: { col: number, row: number }, board: Board, color: Color): Square[] => {
     const to = {
-        file: from.file + direction.file,
-        rank: from.rank + direction.rank
+        col: from.col + direction.col,
+        row: from.row + direction.row
     }
 
     if (!isSquareOnBoard(to)) return []

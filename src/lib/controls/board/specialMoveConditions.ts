@@ -10,14 +10,14 @@ export const isCastling = (board: Board, kingPiece: Piece, rookPiece: Piece) => 
 
 	// 2. Check if there are any pieces between the king and the rook.
 	const squaresBetween: number[] = []
-	const startFile = Math.min(kingPiece.currentSquare.file, rookPiece.currentSquare.file)
-	const endFile = Math.max(kingPiece.currentSquare.file, rookPiece.currentSquare.file)
+	const startCol = Math.min(kingPiece.currentSquare.col, rookPiece.currentSquare.col)
+	const endCol = Math.max(kingPiece.currentSquare.col, rookPiece.currentSquare.col)
 
-	for (let file = startFile + 1; file < endFile; file++) {
-		squaresBetween.push(file)
+	for (let col = startCol + 1; col < endCol; col++) {
+		squaresBetween.push(col)
 	}
 
-	if (squaresBetween.some(file => board.currentPieces[kingPiece.currentSquare.rank][file])) {
+	if (squaresBetween.some(col => board.currentPieces[kingPiece.currentSquare.row][col])) {
 		return false
 	}
 
@@ -27,9 +27,9 @@ export const isCastling = (board: Board, kingPiece: Piece, rookPiece: Piece) => 
 	}
 
 	// 4. The king must not pass through or end up on a square that is under attack.
-	const direction = Math.sign(rookPiece.currentSquare.file - kingPiece.currentSquare.file)
-	const kingPassSquare = { rank: kingPiece.currentSquare.rank, file: kingPiece.currentSquare.file + direction }
-	const kingEndSquare = { rank: kingPiece.currentSquare.rank, file: kingPiece.currentSquare.file + 2 * direction }
+	const direction = Math.sign(rookPiece.currentSquare.col - kingPiece.currentSquare.col)
+	const kingPassSquare = { row: kingPiece.currentSquare.row, col: kingPiece.currentSquare.col + direction }
+	const kingEndSquare = { row: kingPiece.currentSquare.row, col: kingPiece.currentSquare.col + 2 * direction }
 
 	if (isSquareThreatened(board, kingPassSquare, kingPiece.color) || isSquareThreatened(board, kingEndSquare, kingPiece.color)) {
 		return false
@@ -48,7 +48,7 @@ export const isEnPassant = (board: Board, pawn: Piece, capturedSquare: Square) =
 		return false
 	}
 
-	const capturedPiece = board.currentPieces[capturedSquare.rank][capturedSquare.file]
+	const capturedPiece = board.currentPieces[capturedSquare.row][capturedSquare.col]
 
 	// 1. The captured piece must be a pawn of the opposite color.
 	if (!capturedPiece || capturedPiece.name !== "pawn" || capturedPiece.color === pawn.color) {
@@ -56,18 +56,18 @@ export const isEnPassant = (board: Board, pawn: Piece, capturedSquare: Square) =
 	}
 
 	// 2. The last move must have been that pawn moving two squares forward.
-	const wasTwoSquareAdvance = Math.abs(lastMove.from.rank - lastMove.to.rank) === 2
-	const isCorrectPiece = lastMove.to.rank === capturedSquare.rank && lastMove.to.file === capturedSquare.file
+	const wasTwoSquareAdvance = Math.abs(lastMove.from.row - lastMove.to.row) === 2
+	const isCorrectPiece = lastMove.to.row === capturedSquare.row && lastMove.to.col === capturedSquare.col
 
 	if (!wasTwoSquareAdvance || !isCorrectPiece) {
 		return false
 	}
 
-	// 3. The attacking pawn must be on the correct rank.
-	const isCorrectRankForWhite = pawn.color === "white" && pawn.currentSquare.rank === 4
-	const isCorrectRankForBlack = pawn.color === "black" && pawn.currentSquare.rank === 3
+	// 3. The attacking pawn must be on the correct row.
+	const isCorrectRowForWhite = pawn.color === "white" && pawn.currentSquare.row === 4
+	const isCorrectRowForBlack = pawn.color === "black" && pawn.currentSquare.row === 3
 
-	if (!isCorrectRankForWhite && !isCorrectRankForBlack) {
+	if (!isCorrectRowForWhite && !isCorrectRowForBlack) {
 		return false
 	}
 
@@ -75,9 +75,9 @@ export const isEnPassant = (board: Board, pawn: Piece, capturedSquare: Square) =
 }
 
 export const isPromotion = (pawn: Piece) => {
-	if (pawn.color === 'white' && pawn.currentSquare.rank === 6) //This is the position before moving 
+	if (pawn.color === 'white' && pawn.currentSquare.row === 6) //This is the position before moving 
 		return true
-	if (pawn.color === 'black' && pawn.currentSquare.rank === 1)
+	if (pawn.color === 'black' && pawn.currentSquare.row === 1)
 		return true
 	return false
  }
@@ -85,9 +85,9 @@ export const isPromotion = (pawn: Piece) => {
 export const getMoveType = (board: Board, pieceMove: PieceMove): "regular" | "promotion" | "castling" | "enPassant" => {
 	const { piece, from, to } = pieceMove
 	
-	if (piece.name === "king" && Math.abs(from.file - to.file) === 2) {
-		const rookFile = to.file > from.file ? 7 : 0
-		const rook = board.currentPieces[from.rank][rookFile]
+	if (piece.name === "king" && Math.abs(from.col - to.col) === 2) {
+		const rookCol = to.col > from.col ? 7 : 0
+		const rook = board.currentPieces[from.row][rookCol]
 		if (rook && rook.name === "rook" && isCastling(board, piece, rook)) {
 			return "castling"
 		}
@@ -98,11 +98,11 @@ export const getMoveType = (board: Board, pieceMove: PieceMove): "regular" | "pr
 			return "promotion"
 		}
 		
-		const isDiagonal = from.file !== to.file
-		const isMovingToEmptySquare = !board.currentPieces[to.rank][to.file]
+		const isDiagonal = from.col !== to.col
+		const isMovingToEmptySquare = !board.currentPieces[to.row][to.col]
 
 		if (isDiagonal && isMovingToEmptySquare) {
-			const capturedPawnSquare = { rank: from.rank, file: to.file }
+			const capturedPawnSquare = { row: from.row, col: to.col }
 			if (isEnPassant(board, piece, capturedPawnSquare)) {
 				return "enPassant"
 			}

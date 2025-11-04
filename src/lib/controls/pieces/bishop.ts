@@ -3,10 +3,10 @@ import { getStraightMovesInDirection } from "../utils"
 
 const getPossibleMoves = (color: Color, from: Square,  board: Board): Square[] => {
 	const directions = [
-		{ file: 1, rank: 1 },   // up-right
-		{ file: 1, rank: -1 },  // down-right
-		{ file: -1, rank: 1 },  // up-left
-		{ file: -1, rank: -1 }  // down-left
+		{ col: 1, row: 1 },   // up-right
+		{ col: 1, row: -1 },  // down-right
+		{ col: -1, row: 1 },  // up-left
+		{ col: -1, row: -1 }  // down-left
 	]
 
 	return directions.flatMap(direction => getStraightMovesInDirection(from, direction, board, color))
