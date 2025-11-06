@@ -1,9 +1,13 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Word } from '../letter';
+import Alert from '../alert/alert';
+import BorderedBox from '../gui/BorderedBox';
 
 const RightWrapper = () => {
 	const audioContextRef = useRef<AudioContext | null>(null);
 	const oscillatorRef = useRef<OscillatorNode | null>(null);
+	const [alert, setAlert] = useState<{ message: string; type: 'info' | 'success' | 'warning' | 'error' } | null>(null);
+
 	const playFrequency = (frequency: number) => {
 		if (!audioContextRef.current) {
 			audioContextRef.current = new (window.AudioContext || window.AudioContext)();
@@ -35,9 +39,22 @@ const RightWrapper = () => {
 			oscillatorRef.current = null;
 		}
 	};
+
+	const handleShowAlert = () => {
+		setAlert({ message: 'This is a custom alert!', type: 'success' });
+	};
+
+	const handleCloseAlert = () => {
+		setAlert(null);
+	};
+
 	return (
-		<div className="flex-1 p-8 bg-gray-700 text-white">
-			<Word word="good" />
+		<div className="flex-1 p-8 bg-gray-700 text-white items-center justify-center">
+			{alert && <Alert message={alert.message} type={alert.type} onClose={handleCloseAlert} />}
+
+			<BorderedBox height={10} width={15}>
+				<Word word="good" />
+			</BorderedBox>
 			<div className="flex gap-4 mt-4">
 				<button
 					className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
@@ -54,6 +71,12 @@ const RightWrapper = () => {
 					onMouseLeave={stopSound}
 				>
 					Play 523.25 Hz
+				</button>
+				<button
+					className="bg-purple-500 text-white font-bold py-2 px-4 rounded"
+					onClick={handleShowAlert}
+				>
+					Show Custom Alert
 				</button>
 			</div>
 		</div>

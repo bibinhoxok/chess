@@ -10,6 +10,7 @@ import { AnimatePresence, motion } from "motion/react"
 
 const Chessboard = ({ scale }: { scale: number }) => {
 	const { currentPieces, selectPiece, selectedPiece, possibleMoves, movePiece, currentPlayer, gameHistory, gameStatus } = useChessboard()
+	
 	const board: Board = {
 		selectedPiece,
 		possibleMoves,
@@ -18,20 +19,22 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		gameHistory,
 		gameStatus,
 	}
-	const boardRef = useRef<HTMLDivElement>(null)
-// Board scale
-const boardSize = {
-	scale,
-	boardImageSize: 128,
-	borderSize: 4,
-	squareSize: 15,
-}
 
-const boardScale = {
-	scaledBoardImageSize: boardSize.boardImageSize * boardSize.scale,
-	scaledBorderSize: boardSize.borderSize * boardSize.scale,
-	scaledSquareSize: boardSize.squareSize * boardSize.scale,
-}
+	const boardRef = useRef<HTMLDivElement>(null)
+
+	// Board scale
+	const boardSize = {
+		scale,
+		boardImageSize: 128,
+		borderSize: 4,
+		squareSize: 15,
+	}
+
+	const boardScale = {
+		scaledBoardImageSize: boardSize.boardImageSize * boardSize.scale,
+		scaledBorderSize: boardSize.borderSize * boardSize.scale,
+		scaledSquareSize: boardSize.squareSize * boardSize.scale,
+	}
 
 	const isPossibleMove = (square: Square) => selectedPiece && selectedPiece.color === currentPlayer && isValidMove(selectedPiece.getPossibleMoves, currentPlayer, selectedPiece?.currentSquare, board, square)
 
