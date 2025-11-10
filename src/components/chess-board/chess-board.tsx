@@ -1,3 +1,4 @@
+"use client"
 import useChessboard from "@/lib/store/use-chess-board"
 import ChessPiece from "./chess-piece"
 import { Board, Piece, Square } from "@/lib/types/main"

@@ -1,6 +1,7 @@
 import { Square, Color, Board, Piece, GameStatus } from "@/lib/types/main"
 import { getPawnCaptureMoves } from "@/lib/controls/pieces/pawn"
 import { getPossibleMoves } from "../pieces/possible-moves"
+import { createNewCurrentPieces } from "./moves"
 
 
 export const isSquareOnBoard = (square: Square) => {
@@ -35,26 +36,26 @@ export const isSquareThreatened = (board: Board, square: Square, defendingColor:
 }
 
 const findKingSquare = (pieces: Board['currentPieces'], color: Color): Square | null => {
-    for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-            const piece = pieces[r][c];
-            if (piece && piece.name === 'king' && piece.color === color) {
-                return { row: r, col: c };
-            }
-        }
-    }
-    return null;
+	if (!color) return null;
+	const square = pieces.map((row, rowIndex) => {
+		return row.map((piece, colIndex) => {
+			if (piece && piece.name === 'king' && piece.color === color) {
+				return { row: rowIndex, col: colIndex } as Square
+			}
+			return undefined
+		})
+	}).flat().filter(square => square).at(0);
+
+	return square ? square : null
 };
 
 const simulateMove = (board: Board, from: Square, to: Square): Board => {
-    const pieceToMove = board.currentPieces[from.row][from.col];
-    if (!pieceToMove) return board;
+	const pieceToMove = board.currentPieces[from.row][from.col];
+	if (!pieceToMove) return board;
 
-    const newPieces = board.currentPieces.map(row => [...row]);
-    newPieces[to.row][to.col] = pieceToMove;
-    newPieces[from.row][from.col] = null;
-    
-    return { ...board, currentPieces: newPieces };
+	const newPieces = createNewCurrentPieces(board, [{ from, to, piece: pieceToMove }]);
+
+	return { ...board, currentPieces: newPieces };
 }
 
 export const isValidMove = (from: Square, piece: Piece, board: Board, to: Square) => {
@@ -63,7 +64,7 @@ export const isValidMove = (from: Square, piece: Piece, board: Board, to: Square
 	}
 
 	const boardAfterMove = simulateMove(board, from, to);
-    const kingSquare = piece.name === 'king' ? to : findKingSquare(boardAfterMove.currentPieces, piece.color);
+	const kingSquare = piece.name === 'king' ? to : findKingSquare(boardAfterMove.currentPieces, piece.color);
 
 	if (!kingSquare) return true;
 
@@ -71,10 +72,10 @@ export const isValidMove = (from: Square, piece: Piece, board: Board, to: Square
 };
 
 const hasValidMoves = (board: Board) => {
-	return board.currentPieces.some((row, r) => 
-		row.some((piece, c) => {
+	return board.currentPieces.some((row, rowIndex) =>
+		row.some((piece, colIndex) => {
 			if (piece && piece.color === board.currentPlayer) {
-				const from = { row: r, col: c };
+				const from = { row: rowIndex, col: colIndex };
 				const possibleMoves = getPossibleMoves(from, piece, board);
 				return possibleMoves.some(move => isValidMove(from, piece, board, move));
 			}
@@ -101,9 +102,9 @@ export const isStaleMate = (board: Board) => {
 }
 
 export const isInsufficientMaterial = (board: Board) => {
-	const piecesWithSquares = board.currentPieces.flatMap((row, r) =>
-        row.map((piece, c) => (piece ? { piece, square: { row: r, col: c } } : null))
-    ).filter((item): item is { piece: Piece; square: Square } => item !== null);
+	const piecesWithSquares = board.currentPieces.flatMap((row, rowIndex) =>
+		row.map((piece, colIndex) => (piece ? { piece, square: { row: rowIndex, col: colIndex } } : null))
+	).filter((item): item is { piece: Piece; square: Square } => item !== null);
 
 	const nonKingPieces = piecesWithSquares.filter(p => p.piece.name !== 'king')
 	const whiteNonKingPieces = nonKingPieces.filter(p => p.piece.color === 'white')
@@ -131,7 +132,7 @@ export const isInsufficientMaterial = (board: Board) => {
 
 	// Case 4: Both sides only have bishops, and all are on same-colored squares.
 	const bishops = nonKingPieces.filter(p => p.piece.name === 'bishop')
-	if (bishops.length > 0 && bishops.length === nonKingPieces.length) {
+	if (bishops.length === nonKingPieces.length && nonKingPieces.length > 0) {
 		const firstBishopSquareColor = (bishops[0].square.row + bishops[0].square.col) % 2
 		return bishops.every(b => {
 			const color = (b.square.row + b.square.col) % 2

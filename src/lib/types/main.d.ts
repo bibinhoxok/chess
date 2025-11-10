@@ -49,7 +49,7 @@ export type Board = {
 }
 
 export type Piece = {
-	color: Color
-	name: PieceName
-	value: number
+	readonly color: Color
+	readonly name: PieceName
+	readonly value: number
 }
