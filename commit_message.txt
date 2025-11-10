@@ -1,0 +1,15 @@
+refactor(chess-logic): Centralize move generation and simplify validation
+
+This commit refactors the core chess logic to centralize move generation and simplify move validation.
+
+Key changes:
+
+-   **Centralized Move Generation:** A new `getPossibleMoves` function has been introduced in `src/lib/controls/pieces/possible-moves.ts` to serve as a single entry point for calculating all possible moves for a given piece. This replaces the `getPossibleMoves` method previously on the `Piece` object itself.
+
+-   **Simplified Move Validation:** The `isValidMove` function has been simplified. It now takes the `Piece` object directly, rather than a `getPossibleMoves` function, which streamlines the validation process.
+
+-   **File Renaming and Deletion:** Several files have been renamed for consistency (e.g., `useChessboard.ts` to `use-chess-board.ts`) or deleted as part of the refactoring (`chessBoard.ts`, `moves.ts`).
+
+-   **Component Updates:** Components have been updated to use the new centralized move generation and validation logic.
+
+This refactoring improves the structure and maintainability of the codebase by decoupling move generation from the piece definitions and providing a clearer, more centralized approach to handling game logic.

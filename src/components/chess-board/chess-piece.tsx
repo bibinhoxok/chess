@@ -1,4 +1,4 @@
-import useChessboard from "@/lib/store/useChessboard"
+import useChessboard from "@/lib/store/use-chess-board"
 import { PieceName, Piece } from "@/lib/types/main"
 import { motion } from "motion/react"
 import { CSSProperties } from "react"

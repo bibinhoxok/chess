@@ -1,6 +1,6 @@
 import { Board, Color, Piece, Square } from "@/lib/types/main"
 import { getPieceAt, getSingleMoveInDirection } from "../utils"
-import { isCastling } from "../board/specialMoveConditions";
+import { isCastling } from "../board/special-move-conditions";
 
 
 

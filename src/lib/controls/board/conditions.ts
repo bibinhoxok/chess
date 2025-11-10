@@ -1,5 +1,6 @@
 import { Square, Color, Board, Piece, GameStatus } from "@/lib/types/main"
 import { getPawnCaptureMoves } from "@/lib/controls/pieces/pawn"
+import { getPossibleMoves } from "../pieces/possible-moves"
 
 
 export const isSquareOnBoard = (square: Square) => {
@@ -7,8 +8,8 @@ export const isSquareOnBoard = (square: Square) => {
 		square.row >= 0 && square.row < 8
 }
 
-const isPseudoLegalMove = (getPossibleMoves: Piece['getPossibleMoves'], color: Color, from: Square, board: Board, to: Square) => {
-	const possibleMoves = getPossibleMoves(color, from, board)
+const isPseudoLegalMove = (piece: Piece, board: Board, to: Square) => {
+	const possibleMoves = getPossibleMoves(piece, board)
 	return possibleMoves.some(move => move.col === to.col && move.row === to.row)
 }
 
@@ -20,36 +21,35 @@ export const isSquareThreatened = (board: Board, square: Square, defendingColor:
 	return board.currentPieces.flat().some(piece => {
 		if (piece && piece.color === attackingColor) {
 			if (piece.name === 'pawn' && isPawnVaildCapture(board, piece, square)) return true
-			else return isPseudoLegalMove(piece.getPossibleMoves, piece.color, piece.currentSquare, board, square)
+			else return isPseudoLegalMove(piece, board, square)
 		}
 		return false
 	})
 }
 
-export const isValidMove = (getPossibleMoves: Piece['getPossibleMoves'], color: Color, from: Square, board: Board, to: Square) => {
-	const piece = board.currentPieces[from.row][from.col];
+export const isValidMove = (piece: Piece, board: Board, to: Square) => {
 	if (!piece) return false
 	if (isChecked(board)) return false
 
 	// Check if the move is pseudo-legal
-	if (!isPseudoLegalMove(getPossibleMoves, color, from, board, to)) {
+	if (!isPseudoLegalMove(piece, board, to)) {
 		return false;
 	}
 
 	// Simulate the move
 	const capturedPiece = board.currentPieces[to.row][to.col];
 	board.currentPieces[to.row][to.col] = piece;
-	board.currentPieces[from.row][from.col] = null;
+	board.currentPieces[piece.currentSquare.row][piece.currentSquare.col] = null;
 
 	// Check if the king is in check after the move
-	const king = board.currentPieces.flat().find(p => p && p.name === 'king' && p.color === color);
+	const king = board.currentPieces.flat().find(p => p && p.name === 'king' && p.color === piece.color);
 	let isKingInCheck = false;
 	if (king) {
-		isKingInCheck = isSquareThreatened(board, king.currentSquare, color);
+		isKingInCheck = isSquareThreatened(board, king.currentSquare, piece.color);
 	}
 
 	// Revert the move
-	board.currentPieces[from.row][from.col] = piece;
+	board.currentPieces[piece.currentSquare.row][piece.currentSquare.col] = piece;
 	board.currentPieces[to.row][to.col] = capturedPiece;
 
 	return !isKingInCheck;
@@ -59,8 +59,8 @@ const hasValidMoves = (board: Board) => {
 	const currentPlayerPieces = board.currentPieces.flat().filter(piece => piece && piece.color === board.currentPlayer)
 	return currentPlayerPieces.some(piece => {
 		if (!piece) return false
-		const possibleMoves = piece.getPossibleMoves(piece.color, piece.currentSquare, board)
-		return possibleMoves.some(move => isValidMove(piece.getPossibleMoves, piece.color, piece.currentSquare, board, move))
+		const possibleMoves = getPossibleMoves(piece,board)
+		return possibleMoves.some(move => isValidMove(piece, board, move))
 	})
 }
 

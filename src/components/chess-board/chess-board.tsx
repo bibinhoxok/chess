@@ -1,10 +1,11 @@
-import useChessboard from "@/lib/store/useChessboard"
+import useChessboard from "@/lib/store/use-chess-board"
 import ChessPiece from "./chess-piece"
 import { Board, Piece, Square } from "@/lib/types/main"
 import { useRef } from "react"
-import { handlePieceMove } from "@/lib/handlers/pieceMove"
+import { handlePieceMove } from "@/lib/handlers/piece-moves"
 import { isValidMove } from "@/lib/controls/board/conditions"
 import { AnimatePresence, motion } from "motion/react"
+import { getPossibleMoves } from "@/lib/controls/pieces/possible-moves"
 
 
 
@@ -36,7 +37,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		scaledSquareSize: boardSize.squareSize * boardSize.scale,
 	}
 
-	const isPossibleMove = (square: Square) => selectedPiece && selectedPiece.color === currentPlayer && isValidMove(selectedPiece.getPossibleMoves, currentPlayer, selectedPiece?.currentSquare, board, square)
+	const isPossibleMove = (square: Square) => selectedPiece && selectedPiece.color === currentPlayer && isValidMove(selectedPiece, board, square)
 
 	const handleDrop = (piece: Piece, event: MouseEvent | TouchEvent | PointerEvent) => {
 		if (!boardRef.current) return

@@ -1,7 +1,7 @@
 import { Board, Color, Piece, Square } from "@/lib/types/main"
 import { getPieceAt } from "../utils"
 import { isSquareOnBoard } from "../board/conditions"
-import { isEnPassant,  isPromotion } from "../board/specialMoveConditions"
+import { isEnPassant,  isPromotion } from "../board/special-move-conditions"
 
 export const getPawnForwardMoves = (color: Color, from: Square, board: Board): Square[] => {
     const oneSquareForward = color === 'white' ? 1 : -1
