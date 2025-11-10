@@ -15,11 +15,10 @@ const isPseudoLegalMove = (from: Square, piece: Piece, board: Board, to: Square)
 
 export const isSquareThreatened = (board: Board, square: Square, defendingColor: Color) => {
 	const attackingColor: Color = defendingColor === "white" ? "black" : "white"
-	for (let r = 0; r < 8; r++) {
-		for (let c = 0; c < 8; c++) {
-			const piece = board.currentPieces[r][c];
+	return board.currentPieces.some((row, rowIndex) => {
+		return row.some((piece, colIndex) => {
 			if (piece && piece.color === attackingColor) {
-				const from = { row: r, col: c };
+				const from = { row: rowIndex, col: colIndex };
 				if (piece.name === 'pawn') {
 					if (getPawnCaptureMoves(piece.color, from, board).some(move => move.col === square.col && move.row === square.row)) {
 						return true;
@@ -30,78 +29,63 @@ export const isSquareThreatened = (board: Board, square: Square, defendingColor:
 					}
 				}
 			}
-		}
-	}
-	return false
+			return false
+		})
+	})
+}
+
+const findKingSquare = (pieces: Board['currentPieces'], color: Color): Square | null => {
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const piece = pieces[r][c];
+            if (piece && piece.name === 'king' && piece.color === color) {
+                return { row: r, col: c };
+            }
+        }
+    }
+    return null;
+};
+
+const simulateMove = (board: Board, from: Square, to: Square): Board => {
+    const pieceToMove = board.currentPieces[from.row][from.col];
+    if (!pieceToMove) return board;
+
+    const newPieces = board.currentPieces.map(row => [...row]);
+    newPieces[to.row][to.col] = pieceToMove;
+    newPieces[from.row][from.col] = null;
+    
+    return { ...board, currentPieces: newPieces };
 }
 
 export const isValidMove = (from: Square, piece: Piece, board: Board, to: Square) => {
-	if (!piece) return false
-
-	// Check if the move is pseudo-legal
-	if (!isPseudoLegalMove(from, piece, board, to)) {
+	if (!piece || !isPseudoLegalMove(from, piece, board, to)) {
 		return false;
 	}
 
-	// Simulate the move
-	const capturedPiece = board.currentPieces[to.row][to.col];
-	board.currentPieces[to.row][to.col] = piece;
-	board.currentPieces[from.row][from.col] = null;
+	const boardAfterMove = simulateMove(board, from, to);
+    const kingSquare = piece.name === 'king' ? to : findKingSquare(boardAfterMove.currentPieces, piece.color);
 
-	// Check if the king is in check after the move
-	let kingSquare: Square | null = null;
-    for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-            const p = board.currentPieces[r][c];
-            if (p && p.name === 'king' && p.color === piece.color) {
-                kingSquare = { row: r, col: c };
-                break;
-            }
-        }
-        if (kingSquare) break;
-    }
+	if (!kingSquare) return true;
 
-	let isKingInCheck = false;
-	if (kingSquare) {
-		isKingInCheck = isSquareThreatened(board, kingSquare, piece.color);
-	}
-
-	// Revert the move
-	board.currentPieces[from.row][from.col] = piece;
-	board.currentPieces[to.row][to.col] = capturedPiece;
-
-	return !isKingInCheck;
+	return !isSquareThreatened(boardAfterMove, kingSquare, piece.color);
 };
 
 const hasValidMoves = (board: Board) => {
-	for (let r = 0; r < 8; r++) {
-		for (let c = 0; c < 8; c++) {
-			const piece = board.currentPieces[r][c];
+	return board.currentPieces.some((row, r) => 
+		row.some((piece, c) => {
 			if (piece && piece.color === board.currentPlayer) {
 				const from = { row: r, col: c };
 				const possibleMoves = getPossibleMoves(from, piece, board);
-				if (possibleMoves.some(move => isValidMove(from, piece, board, move))) {
-					return true;
-				}
+				return possibleMoves.some(move => isValidMove(from, piece, board, move));
 			}
-		}
-	}
-	return false;
+			return false;
+		})
+	);
 }
 
 
 export const isChecked = (board: Board) => {
-	let kingSquare: Square | null = null;
-    for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-            const p = board.currentPieces[r][c];
-            if (p && p.name === 'king' && p.color === board.currentPlayer) {
-                kingSquare = { row: r, col: c };
-                break;
-            }
-        }
-        if (kingSquare) break;
-    }
+	const kingSquare = findKingSquare(board.currentPieces, board.currentPlayer);
 	if (!kingSquare) return false
 	return isSquareThreatened(board, kingSquare, board.currentPlayer)
 }
@@ -117,15 +101,9 @@ export const isStaleMate = (board: Board) => {
 }
 
 export const isInsufficientMaterial = (board: Board) => {
-	const piecesWithSquares: { piece: Piece, square: Square }[] = [];
-    for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-            const piece = board.currentPieces[r][c];
-            if (piece) {
-                piecesWithSquares.push({ piece, square: { row: r, col: c } });
-            }
-        }
-    }
+	const piecesWithSquares = board.currentPieces.flatMap((row, r) =>
+        row.map((piece, c) => (piece ? { piece, square: { row: r, col: c } } : null))
+    ).filter((item): item is { piece: Piece; square: Square } => item !== null);
 
 	const nonKingPieces = piecesWithSquares.filter(p => p.piece.name !== 'king')
 	const whiteNonKingPieces = nonKingPieces.filter(p => p.piece.color === 'white')
