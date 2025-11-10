@@ -1,7 +1,8 @@
 import { Board, Color, Piece, Square } from "@/lib/types/main"
 import { getStraightMovesInDirection } from "../utils"
 
-const getPossibleMoves = (color: Color, from: Square, board: Board): Square[] => {
+export const getPossibleQueenMoves = (piece: Piece, board: Board): Square[] => {
+	const { color, currentSquare: from } = piece;
 	const directions = [
 		{ col: 1, row: 0 },
 		{ col: -1, row: 0 },
@@ -21,5 +22,4 @@ export const queen = (color: Color, currentSquare: Square): Piece => ({
 	name: "queen",
 	currentSquare,
 	value: 9,
-	getPossibleMoves
 })

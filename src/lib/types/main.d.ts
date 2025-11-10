@@ -49,8 +49,9 @@ export type Board = {
 
 export type Piece = {
 	color: Color
-	name: pieceName
+	name: PieceName
 	currentSquare: Square
 	value: number
-	getPossibleMoves: (color: Color, from: Square, board: Board) => Square[]
 }
+
+export type GetPossibleMoves = (piece: Piece, board: Board) => Square[]

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { Word } from '../letter';
+import { Word } from '../gui/letter';
 import Alert from '../alert/alert';
-import BorderedBox from '../gui/BorderedBox';
+import BorderedBox from '../gui/bordered-box';
 
 const RightWrapper = () => {
 	const audioContextRef = useRef<AudioContext | null>(null);

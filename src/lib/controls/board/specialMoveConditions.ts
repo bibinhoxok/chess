@@ -9,13 +9,9 @@ export const isCastling = (board: Board, kingPiece: Piece, rookPiece: Piece) => 
 	}
 
 	// 2. Check if there are any pieces between the king and the rook.
-	const squaresBetween: number[] = []
 	const startCol = Math.min(kingPiece.currentSquare.col, rookPiece.currentSquare.col)
 	const endCol = Math.max(kingPiece.currentSquare.col, rookPiece.currentSquare.col)
-
-	for (let col = startCol + 1; col < endCol; col++) {
-		squaresBetween.push(col)
-	}
+	const squaresBetween: number[] = Array.from({ length: endCol - startCol - 1 }, (_, i) => i + startCol + 1)
 
 	if (squaresBetween.some(col => board.currentPieces[kingPiece.currentSquare.row][col])) {
 		return false

@@ -4,7 +4,8 @@ import { isCastling } from "../board/specialMoveConditions";
 
 
 
-const getPossibleMoves = (color: Color, from: Square, board: Board): Square[] => {
+export const getPossibleKingMoves = (piece: Piece, board: Board): Square[] => {
+    const { color, currentSquare: from } = piece;
     const directions = [
         { col: 1, row: 0 },   // Right
         { col: -1, row: 0 },  // Left
@@ -15,14 +16,17 @@ const getPossibleMoves = (color: Color, from: Square, board: Board): Square[] =>
         { col: -1, row: 1 },  // Up-Left
         { col: -1, row: -1 }  // Down-Left
     ];
-    const castlingMoves = board.currentPieces.flat().flatMap(piece => {
-        const kingPiece = board.currentPieces[from.row][from.col];
-        if (kingPiece && piece && piece.name === 'rook' && piece.color === color && isCastling(board, kingPiece, piece)) {
-            const direction = Math.sign(piece.currentSquare.col - from.col);
-            return [{ row: from.row, col: from.col + 2 * direction }];
-        }
-        return [];
-    });
+    const kingPiece = board.currentPieces[from.row][from.col];
+    if (!kingPiece) return [];
+
+    const castlingMoves = board.currentPieces
+        .flat()
+        .filter((p): p is Piece => p !== null && p.name === 'rook' && p.color === color)
+        .filter(rook => isCastling(board, kingPiece, rook))
+        .map(rook => {
+            const direction = Math.sign(rook.currentSquare.col - from.col);
+            return { row: from.row, col: from.col + 2 * direction };
+        });
 
     const moves = directions.flatMap(direction => getSingleMoveInDirection(from, direction, board, color)).concat(castlingMoves);
 
@@ -34,5 +38,4 @@ export const king = (color: Color, currentSquare: Square): Piece => ({
     name: "king",
     currentSquare,
     value: 1000, // King is invaluable
-    getPossibleMoves
 })

@@ -66,7 +66,8 @@ export const getEnPassantMove = (color: Color, from: Square, board: Board): Squa
     })
 }
 
-const getPossibleMoves = (color: Color, from: Square, board: Board): Square[] => {
+export const getPossiblePawnMoves = (piece: Piece, board: Board): Square[] => {
+    const { color, currentSquare: from } = piece;
     return [
         ...getPawnForwardMoves(color, from, board),
         ...getPawnCaptureMoves(color, from, board),
@@ -80,5 +81,4 @@ export const pawn = (color: Color, currentSquare: Square): Piece => ({
     name: "pawn",
     currentSquare,
     value: 1,
-    getPossibleMoves
 })
