@@ -10,10 +10,11 @@ import { getPossibleMoves } from "@/lib/controls/pieces/possible-moves"
 
 
 const Chessboard = ({ scale }: { scale: number }) => {
-	const { currentPieces, selectPiece, selectedPiece, possibleMoves, movePiece, currentPlayer, gameHistory, gameStatus } = useChessboard()
+	const { currentPieces, selectPiece, selectedPiece, possibleMoves, movePiece, currentPlayer, gameHistory, gameStatus, selectedSquare } = useChessboard()
 	
 	const board: Board = {
 		selectedPiece,
+		selectedSquare,
 		possibleMoves,
 		currentPieces,
 		currentPlayer,
@@ -37,7 +38,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		scaledSquareSize: boardSize.squareSize * boardSize.scale,
 	}
 
-	const isPossibleMove = (square: Square) => selectedPiece && selectedPiece.color === currentPlayer && isValidMove(selectedPiece, board, square)
+	const isPossibleMove = (square: Square) => selectedPiece && selectedSquare && selectedPiece.color === currentPlayer && isValidMove(selectedSquare, selectedPiece, board, square)
 
 	const handleDrop = (piece: Piece, event: MouseEvent | TouchEvent | PointerEvent) => {
 		if (!boardRef.current) return
@@ -65,8 +66,15 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		const col = Math.floor((x - boardScale.scaledBorderSize) / boardScale.scaledSquareSize)
 		const row = Math.floor((y - boardScale.scaledBorderSize) / boardScale.scaledSquareSize)
 		const to = { row, col };
-		if (selectedPiece && isPossibleMove({ row, col })) {
-			handlePieceMove(board, piece, to, movePiece);
+		if (selectedPiece && selectedSquare && isPossibleMove({ row, col })) {
+			handlePieceMove(board, selectedSquare, to, movePiece);
+		}
+	}
+
+	const handleSquareClick = (square: Square) => {
+		const piece = currentPieces[square.row][square.col]
+		if (piece && piece.color === currentPlayer) {
+			selectPiece(square, piece)
 		}
 	}
 
@@ -101,6 +109,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 							}
 							return (
 								<motion.div
+									onClick={() => handleSquareClick(square)}
 									animate={{ rotate: currentPlayer === 'white' ? 180 : 0 }}
 									transition={{
 										duration: 0.5,
@@ -108,9 +117,10 @@ const Chessboard = ({ scale }: { scale: number }) => {
 									key={index} className="relative">
 									<ChessPiece
 										piece={piece}
+										currentSquare={square}
 										scaledSquareSize={boardScale.scaledSquareSize}
 										scale={boardSize.scale}
-										isSelected={selectedPiece?.currentSquare.row === square.row && selectedPiece?.currentSquare.col === square.col}
+										isSelected={selectedSquare?.row === square.row && selectedSquare?.col === square.col}
 										onDrop={handleDrop}
 									/>
 									{isPossibleMove(square) && selectedPiece && (

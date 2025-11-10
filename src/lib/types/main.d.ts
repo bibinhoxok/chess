@@ -40,6 +40,7 @@ export type GameStatus = 'checkmate' | 'stalemate' | 'insufficient material' | '
 
 export type Board = {
 	selectedPiece: Piece | null
+	selectedSquare: Square | null
 	possibleMoves: Square[]
 	currentPieces: (Piece | null)[][]
 	currentPlayer: Color
@@ -50,8 +51,5 @@ export type Board = {
 export type Piece = {
 	color: Color
 	name: PieceName
-	currentSquare: Square
 	value: number
 }
-
-export type GetPossibleMoves = (piece: Piece, board: Board) => Square[]

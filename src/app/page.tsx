@@ -1,7 +1,7 @@
 "use client";
-import Sidebar from '@/components/layout/sidebar';
-import RightWrapper from '@/components/layout/right-wrapper';
-import MainContent from '@/components/layout/main-content';
+import Sidebar from '@/app/(main)/(children)/sidebar';
+import RightWrapper from '@/app/(main)/(children)/right-wrapper';
+import MainContent from '@/app/(main)/(children)/main-content';
 
 export default function Home() {
 

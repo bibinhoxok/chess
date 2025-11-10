@@ -8,7 +8,7 @@ import {
 } from "."
 import { Board, Piece, Square } from "../../types/main"
 
-export const getPossibleMoves = (piece: Piece, board: Board): Square[] => {
+export const getPossibleMoves = (from: Square, piece: Piece, board: Board): Square[] => {
 	if (!piece) return []
 	const moves = {
 		"pawn": getPossiblePawnMoves,
@@ -18,5 +18,5 @@ export const getPossibleMoves = (piece: Piece, board: Board): Square[] => {
 		"queen": getPossibleQueenMoves,
 		"king": getPossibleKingMoves
 	}
-	return moves[piece.name](piece, board)
+	return moves[piece.name](from, piece, board)
 }

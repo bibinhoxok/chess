@@ -48,7 +48,7 @@ export const getPawnCaptureMoves = (color: Color, from: Square, board: Board): S
 export const getPawnPromoteMoves =  (color: Color, from: Square, board: Board): Square[] => {
     const captureMoves = getPawnCaptureMoves(color, from, board)
     const forwardMoves = getPawnForwardMoves(color, from, board)
-    return isPromotion(getPieceAt(from, board) as Piece) ? [...captureMoves, ...forwardMoves] : []
+    return isPromotion(getPieceAt(from, board) as Piece, from) ? [...captureMoves, ...forwardMoves] : []
 }
 
 export const getEnPassantMove = (color: Color, from: Square, board: Board): Square[] => {
@@ -61,13 +61,13 @@ export const getEnPassantMove = (color: Color, from: Square, board: Board): Squa
             row: from.row + direction.row
         }
         if (!isSquareOnBoard(to)) return []
-        if (isEnPassant(board, getPieceAt(from, board) as Piece, { col: from.col + direction.col, row: from.row} as Square)) return [to]
+        if (isEnPassant(board, getPieceAt(from, board) as Piece, from, { col: from.col + direction.col, row: from.row} as Square)) return [to]
         return []
     })
 }
 
-export const getPossiblePawnMoves = (piece: Piece, board: Board): Square[] => {
-    const { color, currentSquare: from } = piece;
+export const getPossiblePawnMoves = (from: Square, piece: Piece, board: Board): Square[] => {
+    const { color } = piece;
     return [
         ...getPawnForwardMoves(color, from, board),
         ...getPawnCaptureMoves(color, from, board),
@@ -76,9 +76,8 @@ export const getPossiblePawnMoves = (piece: Piece, board: Board): Square[] => {
     ]
 }
 
-export const pawn = (color: Color, currentSquare: Square): Piece => ({
+export const pawn = (color: Color): Piece => ({
     color,
     name: "pawn",
-    currentSquare,
     value: 1,
 })

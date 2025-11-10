@@ -1,5 +1,5 @@
 import useChessboard from "@/lib/store/use-chess-board"
-import { PieceName, Piece } from "@/lib/types/main"
+import { PieceName, Piece, Square } from "@/lib/types/main"
 import { motion } from "motion/react"
 import { CSSProperties } from "react"
 
@@ -29,14 +29,15 @@ const offsetSpriteSheet = (pieceName: PieceName, spriteSheet: string) => {
 
 
 type ChessPieceProps = {
-    piece: Piece | null
+    piece: Piece | null,
+    currentSquare: Square,
     scaledSquareSize: number
     scale: number
     isSelected: boolean
     onDrop: (piece: Piece, event: MouseEvent | TouchEvent | PointerEvent) => void
 }
 
-const ChessPiece = ({ piece, scaledSquareSize, scale, isSelected, onDrop }: ChessPieceProps) =>{ 
+const ChessPiece = ({ piece, currentSquare, scaledSquareSize, scale, isSelected, onDrop }: ChessPieceProps) =>{ 
     const { selectPiece } = useChessboard()
     return(
     <div
@@ -50,8 +51,8 @@ const ChessPiece = ({ piece, scaledSquareSize, scale, isSelected, onDrop }: Ches
                 <motion.div 
                     drag
                     dragMomentum={false}
-                    onClick={() => selectPiece(piece)}
-                    onDragStart={()=>selectPiece(piece)}
+                    onClick={() => selectPiece(currentSquare, piece)}
+                    onDragStart={()=>selectPiece(currentSquare, piece)}
                     onDragEnd={(event) => {
                         onDrop(piece, event as MouseEvent | TouchEvent | PointerEvent)
                     }}

@@ -4,11 +4,11 @@ import { Board, CastlingMove, EnPassantMove, Piece, PieceMove, PromotionMove, Re
 
 export const handlePieceMove = (
 	board: Board,
-	piece: Piece,
+	from: Square,
 	to: Square,
 	movePiece: (move: RegularMove | PromotionMove | CastlingMove | EnPassantMove) => void
 ) => {
-	const from = piece.currentSquare;
+	const piece = board.currentPieces[from.row][from.col] as Piece;
 	const pieceMove: PieceMove = {
 		from,
 		to,
@@ -17,15 +17,16 @@ export const handlePieceMove = (
 	const moveType = getMoveType(board, pieceMove);
 	const handleCastlingMove = () => {
 		const kingMove: PieceMove = {
-			from: piece.currentSquare,
+			from,
 			to,
 			piece,
 		};
 		const rookCol = to.col > from.col ? 7 : 0;
 		const rookToCol = to.col > from.col ? 5 : 3;
 		const rook = board.currentPieces[from.row][rookCol] as Piece;
+		const rookSquare = { row: from.row, col: rookCol };
 		const rookMove: PieceMove = {
-			from: rook.currentSquare,
+			from: rookSquare,
 			to: { row: from.row, col: rookToCol },
 			piece: rook,
 		};
@@ -55,7 +56,7 @@ export const handlePieceMove = (
 			from,
 			to,
 			piece,
-			promotionTo: queen(piece.color, to),// Simplified promotion to queen
+			promotionTo: queen(piece.color),// Simplified promotion to queen
 			capturedPiece: board.currentPieces[to.row][to.col] || undefined,
 		};
 		movePiece(promotionMove);

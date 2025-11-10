@@ -7,8 +7,7 @@ const createNewCurrentPieces = (board: Board, pieceMoves: PieceMove[], promotePi
     pieceMoves.forEach(pieceMove => {
         //Update the piece's internal state with the new square
         let movedPiece: Piece = {
-            ...pieceMove.piece,
-            currentSquare: pieceMove.to
+            ...pieceMove.piece
         };
         if (promotePiece) {
             movedPiece.name = promotePiece.name
@@ -46,7 +45,7 @@ const castlingMove = (board: Board, move: CastlingMove): Board => ({
 const enPassantMove = (board: Board, move: EnPassantMove): Board => ({
     ...board,
     //Move the captured piece to the destination first, then the pawn move and capture it
-    currentPieces: createNewCurrentPieces(board, [{ from: move.capturedPiece.currentSquare, to: move.to, piece: move.piece } as PieceMove, move]), 
+    currentPieces: createNewCurrentPieces(board, [{ from: move.from, to: move.to, piece: move.piece } as PieceMove, move]), 
     currentPlayer: board.currentPlayer === 'white' ? 'black' : 'white',
     gameHistory: [...board.gameHistory, move]
 })

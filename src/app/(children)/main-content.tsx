@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIsClient, useWindowSize } from 'usehooks-ts';
-import Chessboard from '../chess-board/chess-board';
+import Chessboard from '../../../components/chess-board/chess-board';
 
 const MainContent = () => {
 	const { width = 0, height = 0 } = useWindowSize()

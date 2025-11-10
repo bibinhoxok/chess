@@ -2,30 +2,30 @@ import { Board, Piece, PieceMove, Square } from "@/lib/types/main"
 import { isSquareThreatened } from "./conditions"
 
 
-export const isCastling = (board: Board, kingPiece: Piece, rookPiece: Piece) => {
+export const isCastling = (board: Board, kingPiece: Piece, kingSquare: Square, rookPiece: Piece, rookSquare: Square) => {
 	// 1. Check if the king or the rook have moved before.
 	if (board.gameHistory.some(move => move.type === 'regular' && (move.piece === kingPiece || move.piece === rookPiece))) {
 		return false
 	}
 
 	// 2. Check if there are any pieces between the king and the rook.
-	const startCol = Math.min(kingPiece.currentSquare.col, rookPiece.currentSquare.col)
-	const endCol = Math.max(kingPiece.currentSquare.col, rookPiece.currentSquare.col)
+	const startCol = Math.min(kingSquare.col, rookSquare.col)
+	const endCol = Math.max(kingSquare.col, rookSquare.col)
 	const squaresBetween: number[] = Array.from({ length: endCol - startCol - 1 }, (_, i) => i + startCol + 1)
 
-	if (squaresBetween.some(col => board.currentPieces[kingPiece.currentSquare.row][col])) {
+	if (squaresBetween.some(col => board.currentPieces[kingSquare.row][col])) {
 		return false
 	}
 
 	// 3. The king must not be currently in check.
-	if (isSquareThreatened(board, kingPiece.currentSquare, kingPiece.color)) {
+	if (isSquareThreatened(board, kingSquare, kingPiece.color)) {
 		return false
 	}
 
 	// 4. The king must not pass through or end up on a square that is under attack.
-	const direction = Math.sign(rookPiece.currentSquare.col - kingPiece.currentSquare.col)
-	const kingPassSquare = { row: kingPiece.currentSquare.row, col: kingPiece.currentSquare.col + direction }
-	const kingEndSquare = { row: kingPiece.currentSquare.row, col: kingPiece.currentSquare.col + 2 * direction }
+	const direction = Math.sign(rookSquare.col - kingSquare.col)
+	const kingPassSquare = { row: kingSquare.row, col: kingSquare.col + direction }
+	const kingEndSquare = { row: kingSquare.row, col: kingSquare.col + 2 * direction }
 
 	if (isSquareThreatened(board, kingPassSquare, kingPiece.color) || isSquareThreatened(board, kingEndSquare, kingPiece.color)) {
 		return false
@@ -34,7 +34,7 @@ export const isCastling = (board: Board, kingPiece: Piece, rookPiece: Piece) => 
 	return true
 }
 
-export const isEnPassant = (board: Board, pawn: Piece, capturedSquare: Square) => {
+export const isEnPassant = (board: Board, pawn: Piece, pawnSquare: Square, capturedSquare: Square) => {
 	if (board.gameHistory.length === 0) {
 		return false
 	}
@@ -60,8 +60,8 @@ export const isEnPassant = (board: Board, pawn: Piece, capturedSquare: Square) =
 	}
 
 	// 3. The attacking pawn must be on the correct row.
-	const isCorrectRowForWhite = pawn.color === "white" && pawn.currentSquare.row === 4
-	const isCorrectRowForBlack = pawn.color === "black" && pawn.currentSquare.row === 3
+	const isCorrectRowForWhite = pawn.color === "white" && pawnSquare.row === 4
+	const isCorrectRowForBlack = pawn.color === "black" && pawnSquare.row === 3
 
 	if (!isCorrectRowForWhite && !isCorrectRowForBlack) {
 		return false
@@ -70,10 +70,10 @@ export const isEnPassant = (board: Board, pawn: Piece, capturedSquare: Square) =
 	return true
 }
 
-export const isPromotion = (pawn: Piece) => {
-	if (pawn.color === 'white' && pawn.currentSquare.row === 6) //This is the position before moving 
+export const isPromotion = (pawn: Piece, pawnSquare: Square) => {
+	if (pawn.color === 'white' && pawnSquare.row === 6) //This is the position before moving 
 		return true
-	if (pawn.color === 'black' && pawn.currentSquare.row === 1)
+	if (pawn.color === 'black' && pawnSquare.row === 1)
 		return true
 	return false
  }
@@ -83,14 +83,15 @@ export const getMoveType = (board: Board, pieceMove: PieceMove): "regular" | "pr
 	
 	if (piece.name === "king" && Math.abs(from.col - to.col) === 2) {
 		const rookCol = to.col > from.col ? 7 : 0
+		const rookSquare = { row: from.row, col: rookCol }
 		const rook = board.currentPieces[from.row][rookCol]
-		if (rook && rook.name === "rook" && isCastling(board, piece, rook)) {
+		if (rook && rook.name === "rook" && isCastling(board, piece, from, rook, rookSquare)) {
 			return "castling"
 		}
 	}
 
 	if (piece.name === "pawn") {
-		if (isPromotion(piece)) {
+		if (isPromotion(piece, from)) {
 			return "promotion"
 		}
 		
@@ -99,7 +100,7 @@ export const getMoveType = (board: Board, pieceMove: PieceMove): "regular" | "pr
 
 		if (isDiagonal && isMovingToEmptySquare) {
 			const capturedPawnSquare = { row: from.row, col: to.col }
-			if (isEnPassant(board, piece, capturedPawnSquare)) {
+			if (isEnPassant(board, piece, from, capturedPawnSquare)) {
 				return "enPassant"
 			}
 		}

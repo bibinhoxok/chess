@@ -1,8 +1,8 @@
 import { Board, Color, Piece, Square } from "@/lib/types/main"
 import { getStraightMovesInDirection } from "../utils"
 
-export const getPossibleRookMoves = (piece: Piece, board: Board): Square[] => {
-	const { color, currentSquare: from } = piece;
+export const getPossibleRookMoves = (from: Square, piece: Piece, board: Board): Square[] => {
+	const { color } = piece;
 	const directions = [
 		{ col: 1, row: 0 },
 		{ col: -1, row: 0 },
@@ -13,9 +13,8 @@ export const getPossibleRookMoves = (piece: Piece, board: Board): Square[] => {
 	return directions.flatMap(direction => getStraightMovesInDirection(from, direction, board, color))
 }
 
-export const rook = (color: Color, currentSquare: Square): Piece => ({
+export const rook = (color: Color): Piece => ({
 	color,
 	name: "rook",
-	currentSquare,
 	value: 5,
 })

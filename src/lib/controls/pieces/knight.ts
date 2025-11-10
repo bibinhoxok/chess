@@ -1,8 +1,8 @@
 import { Board, Color, Piece, Square } from "@/lib/types/main";
 import { getSingleMoveInDirection } from "../utils";
 
-export const getPossibleKnightMoves = (piece: Piece, board: Board): Square[] => {
-    const { color, currentSquare: from } = piece;
+export const getPossibleKnightMoves = (from: Square, piece: Piece, board: Board): Square[] => {
+    const { color } = piece;
     const directions = [
         { col: 1, row: 2 },
         { col: 1, row: -2 },
@@ -16,9 +16,8 @@ export const getPossibleKnightMoves = (piece: Piece, board: Board): Square[] => 
     return directions.flatMap(direction => getSingleMoveInDirection(from, direction, board, color));
 }
 
-export const knight = (color: Color, currentSquare: Square): Piece => ({
+export const knight = (color: Color): Piece => ({
     color,
     name: "knight",
-    currentSquare,
     value: 3,
 });
