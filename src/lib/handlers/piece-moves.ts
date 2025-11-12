@@ -1,12 +1,12 @@
 import { getMoveType } from "../controls/board/special-move-conditions";
-import { queen } from "../controls/pieces/queen";
 import { Board, CastlingMove, EnPassantMove, Piece, PieceMove, PromotionMove, RegularMove, Square } from "../types/main";
 
 export const handlePieceMove = (
 	board: Board,
 	from: Square,
 	to: Square,
-	movePiece: (move: RegularMove | PromotionMove | CastlingMove | EnPassantMove) => void
+	movePiece: (move: RegularMove | PromotionMove | CastlingMove | EnPassantMove) => void,
+	setPromotionSquare: (square: Square) => void
 ) => {
 	const piece = board.currentPieces[from.row][from.col] as Piece;
 	const pieceMove: PieceMove = {
@@ -50,16 +50,7 @@ export const handlePieceMove = (
 		movePiece(enPassantMove);
 	}
 	const handlePromotionMove = () => {
-		// For now, auto-promote to Queen. A UI to select the piece would be needed for a full implementation.
-		const promotionMove: PromotionMove = {
-			type: 'promotion',
-			from,
-			to,
-			piece,
-			promotionTo: queen(piece.color),// Simplified promotion to queen
-			capturedPiece: board.currentPieces[to.row][to.col] || undefined,
-		};
-		movePiece(promotionMove);
+		setPromotionSquare(to);
 	}
 	const handleRegularMove = () => {
 		const regularMove: RegularMove = {

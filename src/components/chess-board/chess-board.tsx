@@ -6,12 +6,12 @@ import { useRef } from "react"
 import { handlePieceMove } from "@/lib/handlers/piece-moves"
 import { isValidMove } from "@/lib/controls/board/conditions"
 import { AnimatePresence, motion } from "motion/react"
-import { getPossibleMoves } from "@/lib/controls/pieces/possible-moves"
+import PromotionSelection from "./promotion-selection"
 
 
 
 const Chessboard = ({ scale }: { scale: number }) => {
-	const { currentPieces, selectPiece, selectedPiece, possibleMoves, movePiece, currentPlayer, gameHistory, gameStatus, selectedSquare } = useChessboard()
+	const { currentPieces, selectPiece, selectedPiece, possibleMoves, movePiece, currentPlayer, gameHistory, gameStatus, selectedSquare, setPromotionSquare, promotionSquare } = useChessboard()
 	
 	const board: Board = {
 		selectedPiece,
@@ -68,7 +68,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		const row = Math.floor((y - boardScale.scaledBorderSize) / boardScale.scaledSquareSize)
 		const to = { row, col };
 		if (selectedPiece && selectedSquare && isPossibleMove({ row, col })) {
-			handlePieceMove(board, selectedSquare, to, movePiece);
+			handlePieceMove(board, selectedSquare, to, movePiece, setPromotionSquare);
 		}
 	}
 
@@ -81,6 +81,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 
 	return (
 		<>
+			{promotionSquare && <PromotionSelection />}
 			<AnimatePresence>
 				<motion.div
 					animate={{ rotate: currentPlayer === 'white' ? 180 : 0 }}

@@ -35,10 +35,18 @@ type ChessPieceProps = {
     scale: number
     isSelected: boolean
     onDrop: (piece: Piece, event: MouseEvent | TouchEvent | PointerEvent) => void
+    isDraggable?: boolean
+    isClickable?: boolean
 }
 
-const ChessPiece = ({ piece, currentSquare, scaledSquareSize, scale, isSelected, onDrop }: ChessPieceProps) =>{ 
+const ChessPiece = ({ piece, currentSquare, scaledSquareSize, scale, isSelected, onDrop, isDraggable = true, isClickable = true }: ChessPieceProps) =>{ 
     const { selectPiece } = useChessboard()
+
+    const handleClick = () => {
+        if(isClickable && piece) {
+            selectPiece(currentSquare, piece)
+        }
+    }
     return(
     <div
         className="relative flex items-center justify-center"
@@ -49,10 +57,10 @@ const ChessPiece = ({ piece, currentSquare, scaledSquareSize, scale, isSelected,
     >
         {piece && (
                 <motion.div 
-                    drag
+                    drag={isDraggable}
                     dragMomentum={false}
-                    onClick={() => selectPiece(currentSquare, piece)}
-                    onDragStart={()=>selectPiece(currentSquare, piece)}
+                    onClick={handleClick}
+                    onDragStart={handleClick}
                     onDragEnd={(event) => {
                         onDrop(piece, event as MouseEvent | TouchEvent | PointerEvent)
                     }}
