@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chess Application
 
-## Getting Started
+## Current Progress
 
-First, run the development server:
+- **Game Engine**:
+    - Complete board representation and rendering.
+    - Move validation for all pieces (Pawn, Rook, Knight, Bishop, Queen, King).
+    - Special moves implemented: Castling, Promotion, En Passant.
+    - Game state detection: Check, Checkmate, Stalemate, Insufficient Material.
+- **Architecture**:
+    - Built with Next.js 15, React 19, and Tailwind CSS 4.
+    - State management using Zustand.
+    - Animations with Motion.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Future Plan
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Refinement**:
+    - Fix En Passant capture logic (remove captured piece).
+    - Implement 50-move rule and Threefold Repetition.
+- **Features**:
+    - Add game timer and captured pieces display.
+    - Implement move history and sound effects.
+- **Multiplayer**:
+    - Real-time gameplay with Socket.io.
+    - Room creation and joining.
+- **AI Integration**:
+    - Play against computer (Stockfish).
+- **User System**:
+    - Authentication and user profiles.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tasks
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Core Game Logic Refinement
 
-## Learn More
+- [x] Fix En Passant Logic (Captured pawn not removed)
+- [ ] Verify Castling Logic
+- [x] Implement 50-move rule
+- [/] Implement Threefold Repetition rule
+- [ ] Ensure Game History supports PGN generation
 
-To learn more about Next.js, take a look at the following resources:
+### Game Features (UI/UX)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [ ] Add Game Timer (Countdown for both players)
+- [ ] Add Captured Pieces Display
+- [ ] Add Move History List (Side panel)
+- [ ] Add Sound Effects (Move, Capture, Check, Game Over)
+- [ ] Add "New Game" / "Reset" functionality
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Multiplayer (Socket.io)
 
-## Deploy on Vercel
+- [ ] Set up Custom Server (Express + Socket.io)
+- [ ] Implement Room Creation & Joining
+- [ ] Sync Game State (Moves, Timer, Resignation)
+- [ ] Handle Player Disconnects/Reconnects
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Game Modes & AI
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [ ] Implement Time Controls (Bullet, Blitz, Rapid)
+- [ ] Implement "Play vs Computer" (Random Mover first)
+- [ ] Integrate Stockfish (WASM) for advanced AI
+
+### User & Social
+
+- [ ] Setup Authentication (NextAuth or Clerk)
+- [ ] Create User Profile (Stats, Match History)
+- [ ] Implement In-game Chat

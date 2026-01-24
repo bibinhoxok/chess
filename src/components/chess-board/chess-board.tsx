@@ -8,11 +8,21 @@ import { isValidMove } from "@/lib/controls/board/conditions"
 import { AnimatePresence, motion } from "motion/react"
 import PromotionSelection from "./promotion-selection"
 
-
-
 const Chessboard = ({ scale }: { scale: number }) => {
-	const { currentPieces, selectPiece, selectedPiece, possibleMoves, movePiece, currentPlayer, gameHistory, gameStatus, selectedSquare, setPromotionSquare, promotionSquare } = useChessboard()
-	
+	const {
+		currentPieces,
+		selectPiece,
+		selectedPiece,
+		possibleMoves,
+		movePiece,
+		currentPlayer,
+		gameHistory,
+		gameStatus,
+		selectedSquare,
+		setPromotionSquare,
+		promotionSquare,
+	} = useChessboard()
+
 	const board: Board = {
 		selectedPiece,
 		selectedSquare,
@@ -39,36 +49,53 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		scaledSquareSize: boardSize.squareSize * boardSize.scale,
 	}
 
-	const isPossibleMove = (square: Square) => selectedPiece && selectedSquare && selectedPiece.color === currentPlayer && isValidMove(selectedSquare, selectedPiece, board, square)
+	const isPossibleMove = (square: Square) =>
+		selectedPiece &&
+		selectedSquare &&
+		selectedPiece.color === currentPlayer &&
+		isValidMove(selectedSquare, selectedPiece, board, square)
 
-	const handleDrop = (piece: Piece, event: MouseEvent | TouchEvent | PointerEvent) => {
+	const handleDrop = (
+		piece: Piece,
+		event: MouseEvent | TouchEvent | PointerEvent,
+	) => {
 		if (!boardRef.current) return
 		const boardRect = boardRef.current.getBoundingClientRect()
 
-		let clientX, clientY;
-		if ('changedTouches' in event) {
+		let clientX, clientY
+		if ("changedTouches" in event) {
 			// TouchEvent
-			clientX = event.changedTouches[0].clientX;
-			clientY = event.changedTouches[0].clientY;
+			clientX = event.changedTouches[0].clientX
+			clientY = event.changedTouches[0].clientY
 		} else {
 			// MouseEvent or PointerEvent
-			clientX = event.clientX;
-			clientY = event.clientY;
+			clientX = event.clientX
+			clientY = event.clientY
 		}
 
 		let x = clientX - boardRect.left
 		let y = clientY - boardRect.top
 
-		if (currentPlayer === 'white') {
+		if (currentPlayer === "white") {
 			x = boardRect.width - x
 			y = boardRect.height - y
 		}
 
-		const col = Math.floor((x - boardScale.scaledBorderSize) / boardScale.scaledSquareSize)
-		const row = Math.floor((y - boardScale.scaledBorderSize) / boardScale.scaledSquareSize)
-		const to = { row, col };
+		const col = Math.floor(
+			(x - boardScale.scaledBorderSize) / boardScale.scaledSquareSize,
+		)
+		const row = Math.floor(
+			(y - boardScale.scaledBorderSize) / boardScale.scaledSquareSize,
+		)
+		const to = { row, col }
 		if (selectedPiece && selectedSquare && isPossibleMove({ row, col })) {
-			handlePieceMove(board, selectedSquare, to, movePiece, setPromotionSquare);
+			handlePieceMove(
+				board,
+				selectedSquare,
+				to,
+				movePiece,
+				setPromotionSquare,
+			)
 		}
 	}
 
@@ -84,7 +111,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 			{promotionSquare && <PromotionSelection />}
 			<AnimatePresence>
 				<motion.div
-					animate={{ rotate: currentPlayer === 'white' ? 180 : 0 }}
+					animate={{ rotate: currentPlayer === "white" ? 180 : 0 }}
 					transition={{
 						duration: 0.5,
 					}}
@@ -101,49 +128,62 @@ const Chessboard = ({ scale }: { scale: number }) => {
 							top: `${boardScale.scaledBorderSize}px`,
 							left: `${boardScale.scaledBorderSize}px`,
 							//@ts-ignore
-							'--square-size': `${boardScale.scaledSquareSize}px`,
+							"--square-size": `${boardScale.scaledSquareSize}px`,
 						}}
 					>
 						{currentPieces.flat().map((piece, index) => {
 							const square: Square = {
 								row: Math.floor(index / 8),
-								col: index % 8
+								col: index % 8,
 							}
 							return (
 								<motion.div
 									onClick={() => handleSquareClick(square)}
-									animate={{ rotate: currentPlayer === 'white' ? 180 : 0 }}
+									animate={{
+										rotate:
+											currentPlayer === "white" ? 180 : 0,
+									}}
 									transition={{
 										duration: 0.5,
 									}}
-									key={index} className="relative">
+									key={index}
+									className="relative"
+								>
 									<ChessPiece
 										piece={piece}
 										currentSquare={square}
-										scaledSquareSize={boardScale.scaledSquareSize}
+										scaledSquareSize={
+											boardScale.scaledSquareSize
+										}
 										scale={boardSize.scale}
-										isSelected={selectedSquare?.row === square.row && selectedSquare?.col === square.col}
+										isSelected={
+											selectedSquare?.row ===
+												square.row &&
+											selectedSquare?.col === square.col
+										}
 										onDrop={handleDrop}
 									/>
-									{isPossibleMove(square) && selectedPiece && (
-										<div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-											<div
-												className="bg-[url('/pixel_chess_16x16_byBrysia/set_regular/circle.png')] bg-contain bg-no-repeat"
-												style={{
-													width: `${boardScale.scaledSquareSize}px`,
-													height: `${boardScale.scaledSquareSize}px`,
-													imageRendering: 'pixelated'
-												}}
-											/>
-										</div>
-									)}
+									{isPossibleMove(square) &&
+										selectedPiece && (
+											<div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+												<div
+													className="bg-[url('/pixel_chess_16x16_byBrysia/set_regular/circle.png')] bg-contain bg-no-repeat"
+													style={{
+														width: `${boardScale.scaledSquareSize}px`,
+														height: `${boardScale.scaledSquareSize}px`,
+														imageRendering:
+															"pixelated",
+													}}
+												/>
+											</div>
+										)}
 								</motion.div>
 							)
 						})}
 					</div>
 				</motion.div>
 			</AnimatePresence>
-			<p className='text-white text-2xl'>{currentPlayer} move.</p>
+			<p className="text-white text-2xl">{currentPlayer} move.</p>
 		</>
 	)
 }

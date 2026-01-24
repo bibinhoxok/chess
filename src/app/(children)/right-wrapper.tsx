@@ -1,57 +1,68 @@
 "use client"
-import Alert from '@/components/alert/alert';
-import BorderedBox from '@/components/gui/bordered-box';
-import { Word } from '@/components/gui/letter';
-import React, { useRef, useState } from 'react';
+import Alert from "@/components/alert/alert"
+import BorderedBox from "@/components/gui/bordered-box"
+import { Word } from "@/components/gui/letter"
+import React, { useRef, useState } from "react"
 
 const RightWrapper = () => {
-	const audioContextRef = useRef<AudioContext | null>(null);
-	const oscillatorRef = useRef<OscillatorNode | null>(null);
-	const [alert, setAlert] = useState<{ message: string; type: 'info' | 'success' | 'warning' | 'error' } | null>(null);
+	const audioContextRef = useRef<AudioContext | null>(null)
+	const oscillatorRef = useRef<OscillatorNode | null>(null)
+	const [alert, setAlert] = useState<{
+		message: string
+		type: "info" | "success" | "warning" | "error"
+	} | null>(null)
 
 	const playFrequency = (frequency: number) => {
 		if (!audioContextRef.current) {
-			audioContextRef.current = new (window.AudioContext || window.AudioContext)();
+			audioContextRef.current = new (
+				window.AudioContext || window.AudioContext
+			)()
 		}
-		const audioContext = audioContextRef.current;
+		const audioContext = audioContextRef.current
 
 		if (oscillatorRef.current) {
-			oscillatorRef.current.stop();
+			oscillatorRef.current.stop()
 		}
 
-		const oscillator = audioContext.createOscillator();
-		oscillator.type = 'sine';
-		oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+		const oscillator = audioContext.createOscillator()
+		oscillator.type = "sine"
+		oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime)
 
-		const gainNode = audioContext.createGain();
-		gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+		const gainNode = audioContext.createGain()
+		gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
 
-		oscillator.connect(gainNode);
-		gainNode.connect(audioContext.destination);
+		oscillator.connect(gainNode)
+		gainNode.connect(audioContext.destination)
 
-		oscillator.start();
+		oscillator.start()
 
-		oscillatorRef.current = oscillator;
-	};
+		oscillatorRef.current = oscillator
+	}
 
 	const stopSound = () => {
 		if (oscillatorRef.current) {
-			oscillatorRef.current.stop();
-			oscillatorRef.current = null;
+			oscillatorRef.current.stop()
+			oscillatorRef.current = null
 		}
-	};
+	}
 
 	const handleShowAlert = () => {
-		setAlert({ message: 'This is a custom alert!', type: 'success' });
-	};
+		setAlert({ message: "This is a custom alert!", type: "success" })
+	}
 
 	const handleCloseAlert = () => {
-		setAlert(null);
-	};
+		setAlert(null)
+	}
 
 	return (
 		<div className="flex-1 p-8 bg-gray-700 text-white items-center justify-center">
-			{alert && <Alert message={alert.message} type={alert.type} onClose={handleCloseAlert} />}
+			{alert && (
+				<Alert
+					message={alert.message}
+					type={alert.type}
+					onClose={handleCloseAlert}
+				/>
+			)}
 
 			<BorderedBox height={10} width={15}>
 				<Word word="good" />
@@ -81,7 +92,7 @@ const RightWrapper = () => {
 				</button>
 			</div>
 		</div>
-	);
-};
+	)
+}
 
-export default RightWrapper;
+export default RightWrapper

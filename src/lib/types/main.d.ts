@@ -5,7 +5,7 @@ export type Square = {
 
 export type Color = "white" | "black"
 
-export type PieceName = 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king'
+export type PieceName = "pawn" | "rook" | "knight" | "bishop" | "queen" | "king"
 
 export type PieceMove = {
 	from: Square
@@ -14,29 +14,33 @@ export type PieceMove = {
 }
 
 export type RegularMove = PieceMove & {
-	type: 'regular'
+	type: "regular"
 	capturedPiece?: Piece
 }
 
 export type PromotionMove = PieceMove & {
-	type: 'promotion'
+	type: "promotion"
 	promotionTo: Piece
 	capturedPiece?: Piece
 }
 
 export type CastlingMove = {
-	type: 'castling'
+	type: "castling"
 	kingMove: PieceMove
 	rookMove: PieceMove
 }
 
 export type EnPassantMove = PieceMove & {
-	type: 'enPassant'
+	type: "enPassant"
 	capturedPiece: Piece // the captured pawn
 }
 
-export type Move = RegularMove | PromotionMove | CastlingMove | EnPassantMove;
-export type GameStatus = 'checkmate' | 'stalemate' | 'insufficient material' | 'ongoing'
+export type Move = RegularMove | PromotionMove | CastlingMove | EnPassantMove
+export type GameStatus =
+	| "checkmate"
+	| "stalemate"
+	| "insufficient material"
+	| "ongoing"
 
 export type Board = {
 	selectedPiece: Piece | null
