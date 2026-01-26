@@ -6,11 +6,13 @@ import {
 	Move,
 	PieceName,
 	PromotionMove,
+	Color,
 } from "@/lib/types/main"
 import { chessBoard } from "@/lib/controls/board/chess-board"
 import { movePiece } from "../controls/board/moves"
 import { getPossibleMoves } from "../controls/pieces/possible-moves"
 import { pieces } from "../controls/pieces"
+import { findKingSquare, isChecked } from "../controls/board/conditions"
 
 type BoardState = Board & {
 	movePiece: (move: Move) => void
@@ -19,6 +21,7 @@ type BoardState = Board & {
 	promotionSquare: Square | null
 	setPromotionSquare: (square: Square | null) => void
 	handlePromotion: (promotionTo: PieceName) => void
+	findCheckedKing: (board: Board) => Square | null
 }
 
 const useChessboard = create<BoardState>((set, get) => ({
@@ -64,6 +67,7 @@ const useChessboard = create<BoardState>((set, get) => ({
 			promotionSquare: null,
 		}))
 	},
+	findCheckedKing: (board) => isChecked(board) ? findKingSquare(board.currentPieces, board.currentPlayer) : null
 }))
 
 export default useChessboard

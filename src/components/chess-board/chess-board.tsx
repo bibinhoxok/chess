@@ -2,7 +2,7 @@
 import useChessboard from "@/lib/store/use-chess-board"
 import ChessPiece from "./chess-piece"
 import { Board, Piece, Square } from "@/lib/types/main"
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 import { handlePieceMove } from "@/lib/handlers/piece-moves"
 import { isValidMove } from "@/lib/controls/board/conditions"
 import { AnimatePresence, motion } from "motion/react"
@@ -21,6 +21,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		selectedSquare,
 		setPromotionSquare,
 		promotionSquare,
+		findCheckedKing
 	} = useChessboard()
 
 	const board: Board = {
@@ -47,6 +48,12 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		scaledBoardImageSize: boardSize.boardImageSize * boardSize.scale,
 		scaledBorderSize: boardSize.borderSize * boardSize.scale,
 		scaledSquareSize: boardSize.squareSize * boardSize.scale,
+	}
+
+	const isCheckedKing = (square: Square, board: Board) => {
+		const checkedKing = findCheckedKing(board)
+		if (checkedKing?.col === square.col && checkedKing.row === square.row) return true
+		return false
 	}
 
 	const isPossibleMove = (square: Square) =>
@@ -158,9 +165,10 @@ const Chessboard = ({ scale }: { scale: number }) => {
 										scale={boardSize.scale}
 										isSelected={
 											selectedSquare?.row ===
-												square.row &&
+											square.row &&
 											selectedSquare?.col === square.col
 										}
+										isCheckedKing={isCheckedKing(square, board)}
 										onDrop={handleDrop}
 									/>
 									{isPossibleMove(square) &&

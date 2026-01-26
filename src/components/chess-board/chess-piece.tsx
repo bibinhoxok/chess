@@ -1,7 +1,7 @@
 import useChessboard from "@/lib/store/use-chess-board"
 import { PieceName, Piece, Square } from "@/lib/types/main"
 import { motion } from "motion/react"
-import { CSSProperties } from "react"
+import { CSSProperties, useEffect } from "react"
 
 // The order of pieces in the sprite sheet
 const pieceOrder: PieceName[] = [
@@ -45,6 +45,7 @@ type ChessPieceProps = {
 		piece: Piece,
 		event: MouseEvent | TouchEvent | PointerEvent,
 	) => void
+	isCheckedKing?: boolean
 	isDraggable?: boolean
 	isClickable?: boolean
 }
@@ -55,6 +56,7 @@ const ChessPiece = ({
 	scaledSquareSize,
 	scale,
 	isSelected,
+	isCheckedKing = false,
 	onDrop,
 	isDraggable = true,
 	isClickable = true,
@@ -107,6 +109,19 @@ const ChessPiece = ({
 									piece.name,
 									spriteSheet.hightlight,
 								),
+							}}
+						/>
+					)}
+					{isCheckedKing && (
+						<div
+							className="origin-center absolute"
+							style={{
+								...offsetSpriteSheet(
+									piece.name,
+									spriteSheet.hightlight,
+								),
+								filter:
+									"brightness(0) saturate(100%) invert(62%) sepia(94%) saturate(3665%) hue-rotate(5deg) brightness(103%) contrast(101%)",
 							}}
 						/>
 					)}

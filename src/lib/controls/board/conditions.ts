@@ -52,7 +52,7 @@ export const isSquareThreatened = (
 	})
 }
 
-const findKingSquare = (
+export const findKingSquare = (
 	pieces: Board["currentPieces"],
 	color: Color,
 ): Square | null => {
