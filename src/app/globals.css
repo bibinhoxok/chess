@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@utility pixelated {
+	image-rendering: pixelated;
+}
+
+@utility filter-yellow {
+	/* white to amber-500 filter */
+	filter: brightness(0) saturate(100%) invert(62%) sepia(94%) saturate(3665%)
+		hue-rotate(5deg) brightness(103%) contrast(101%);
+}
+
+@utility chess-sprite {
+	width: 15px;
+	height: 15px;
+}

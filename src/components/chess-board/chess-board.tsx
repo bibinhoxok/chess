@@ -2,7 +2,7 @@
 import useChessboard from "@/lib/store/use-chess-board"
 import ChessPiece from "./chess-piece"
 import { Board, Piece, Square } from "@/lib/types/main"
-import { useEffect, useRef } from "react"
+import { useRef } from "react"
 import { handlePieceMove } from "@/lib/handlers/piece-moves"
 import { isValidMove } from "@/lib/controls/board/conditions"
 import { AnimatePresence, motion } from "motion/react"
@@ -21,7 +21,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		selectedSquare,
 		setPromotionSquare,
 		promotionSquare,
-		findCheckedKing
+		findCheckedKing,
 	} = useChessboard()
 
 	const board: Board = {
@@ -52,7 +52,8 @@ const Chessboard = ({ scale }: { scale: number }) => {
 
 	const isCheckedKing = (square: Square, board: Board) => {
 		const checkedKing = findCheckedKing(board)
-		if (checkedKing?.col === square.col && checkedKing.row === square.row) return true
+		if (checkedKing?.col === square.col && checkedKing.row === square.row)
+			return true
 		return false
 	}
 
@@ -165,22 +166,23 @@ const Chessboard = ({ scale }: { scale: number }) => {
 										scale={boardSize.scale}
 										isSelected={
 											selectedSquare?.row ===
-											square.row &&
+												square.row &&
 											selectedSquare?.col === square.col
 										}
-										isCheckedKing={isCheckedKing(square, board)}
+										isCheckedKing={isCheckedKing(
+											square,
+											board,
+										)}
 										onDrop={handleDrop}
 									/>
 									{isPossibleMove(square) &&
 										selectedPiece && (
 											<div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
 												<div
-													className="bg-[url('/pixel_chess_16x16_byBrysia/set_regular/circle.png')] bg-contain bg-no-repeat"
+													className="bg-[url('/pixel_chess_16x16_byBrysia/set_regular/circle.png')] bg-contain bg-no-repeat pixelated"
 													style={{
 														width: `${boardScale.scaledSquareSize}px`,
 														height: `${boardScale.scaledSquareSize}px`,
-														imageRendering:
-															"pixelated",
 													}}
 												/>
 											</div>

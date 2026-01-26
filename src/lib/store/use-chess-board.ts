@@ -67,7 +67,10 @@ const useChessboard = create<BoardState>((set, get) => ({
 			promotionSquare: null,
 		}))
 	},
-	findCheckedKing: (board) => isChecked(board) ? findKingSquare(board.currentPieces, board.currentPlayer) : null
+	findCheckedKing: (board) =>
+		isChecked(board)
+			? findKingSquare(board.currentPieces, board.currentPlayer)
+			: null,
 }))
 
 export default useChessboard

@@ -1,7 +1,6 @@
 import useChessboard from "@/lib/store/use-chess-board"
 import { PieceName, Piece, Square } from "@/lib/types/main"
 import { motion } from "motion/react"
-import { CSSProperties, useEffect } from "react"
 
 // The order of pieces in the sprite sheet
 const pieceOrder: PieceName[] = [
@@ -29,9 +28,6 @@ const offsetSpriteSheet = (pieceName: PieceName, spriteSheet: string) => {
 	return {
 		backgroundImage: `url(${spriteSheet})`,
 		backgroundPosition: `-${xOffset}px -${yOffset}px`,
-		width: "15px",
-		height: "15px",
-		imageRendering: "pixelated" as CSSProperties["imageRendering"],
 	}
 }
 
@@ -91,7 +87,7 @@ const ChessPiece = ({
 					initial={{ scale }}
 					transition={{ duration: 0.1 }}
 					dragSnapToOrigin
-					className="origin-center"
+					className="origin-center pixelated chess-sprite"
 					style={{
 						...offsetSpriteSheet(
 							piece.name,
@@ -103,7 +99,7 @@ const ChessPiece = ({
 				>
 					{isSelected && (
 						<div
-							className="origin-center absolute"
+							className="origin-center absolute pixelated chess-sprite"
 							style={{
 								...offsetSpriteSheet(
 									piece.name,
@@ -114,14 +110,12 @@ const ChessPiece = ({
 					)}
 					{isCheckedKing && (
 						<div
-							className="origin-center absolute"
+							className="origin-center absolute pixelated filter-yellow chess-sprite"
 							style={{
 								...offsetSpriteSheet(
 									piece.name,
 									spriteSheet.hightlight,
 								),
-								filter:
-									"brightness(0) saturate(100%) invert(62%) sepia(94%) saturate(3665%) hue-rotate(5deg) brightness(103%) contrast(101%)",
 							}}
 						/>
 					)}
