@@ -1,5 +1,5 @@
 import { Board, Color, Piece, Square } from "@/lib/types/main"
-import { getStraightMovesInDirection } from "../utils"
+import { getStraightMovesInDirection } from "../board/moves"
 
 export const getPossibleBishopMoves = (
 	from: Square,

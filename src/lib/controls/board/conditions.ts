@@ -1,7 +1,7 @@
 import { Square, Color, Board, Piece, GameStatus } from "@/lib/types/main"
 import { getPawnCaptureMoves } from "@/lib/controls/pieces/pawn"
-import { getPossibleMoves } from "../pieces/possible-moves"
-import { createNewCurrentPieces } from "./moves"
+import { getPossibleMoves } from "./moves"
+import { getCheckedKing, getPieceAt, getSquareFromPieceType, getThreatingPieces, simulateMove } from "./utils"
 
 export const isSquareOnBoard = (square: Square) => {
 	return (
@@ -10,12 +10,11 @@ export const isSquareOnBoard = (square: Square) => {
 }
 
 const isPseudoLegalMove = (
-	from: Square,
-	piece: Piece,
 	board: Board,
+	from: Square,
 	to: Square,
 ) => {
-	const possibleMoves = getPossibleMoves(from, piece, board)
+	const possibleMoves = getPossibleMoves(from, board)
 	return possibleMoves.some(
 		(move) => move.col === to.col && move.row === to.row,
 	)
@@ -42,7 +41,7 @@ export const isSquareThreatened = (
 						return true
 					}
 				} else {
-					if (isPseudoLegalMove(from, piece, board, square)) {
+					if (isPseudoLegalMove(board, from, square)) {
 						return true
 					}
 				}
@@ -52,45 +51,13 @@ export const isSquareThreatened = (
 	})
 }
 
-export const findKingSquare = (
-	pieces: Board["currentPieces"],
-	color: Color,
-): Square | null => {
-	if (!color) return null
-	const square = pieces
-		.map((row, rowIndex) => {
-			return row.map((piece, colIndex) => {
-				if (piece && piece.name === "king" && piece.color === color) {
-					return { row: rowIndex, col: colIndex } as Square
-				}
-				return undefined
-			})
-		})
-		.flat()
-		.filter((square) => square)
-		.at(0)
-
-	return square ? square : null
-}
-
-const simulateMove = (board: Board, from: Square, to: Square): Board => {
-	const pieceToMove = board.currentPieces[from.row][from.col]
-	if (!pieceToMove) return board
-
-	const newPieces = createNewCurrentPieces(board, [
-		{ from, to, piece: pieceToMove },
-	])
-
-	return { ...board, currentPieces: newPieces }
-}
-
 export const isValidMove = (
-	from: Square,
-	piece: Piece,
 	board: Board,
+	from: Square,
 	to: Square,
 ) => {
-	if (!piece || !isPseudoLegalMove(from, piece, board, to)) {
+	const piece = getPieceAt(from, board)
+	if (!piece || !isPseudoLegalMove(board, from, to)) {
 		return false
 	}
 
@@ -98,7 +65,7 @@ export const isValidMove = (
 	const kingSquare =
 		piece.name === "king"
 			? to
-			: findKingSquare(boardAfterMove.currentPieces, piece.color)
+			:  getSquareFromPieceType(boardAfterMove,["king"],piece.color).at(0)
 
 	if (!kingSquare) return true
 
@@ -110,18 +77,34 @@ const hasValidMoves = (board: Board) => {
 		row.some((piece, colIndex) => {
 			if (piece && piece.color === board.currentPlayer) {
 				const from = { row: rowIndex, col: colIndex }
-				const possibleMoves = getPossibleMoves(from, piece, board)
+				const possibleMoves = getPossibleMoves(from, board)
 				return possibleMoves.some((move) =>
-					isValidMove(from, piece, board, move),
+					isValidMove(board, from, move),
 				)
 			}
 			return false
 		}),
 	)
 }
+export const isCheckedKing = (square: Square, board: Board) => {
+	const checkedKingSquare = getCheckedKing(board)
+	return checkedKingSquare?.col === square.col && checkedKingSquare.row === square.row
+}
+
+export const isThreatingKing = (square: Square, board: Board) => {
+	const kingSquare = getSquareFromPieceType(board,["king"], board.currentPlayer).at(0)
+	const threatingPieceSquares = getThreatingPieces(board, kingSquare!) //king is always on the board
+	return threatingPieceSquares.some(v => v.col === square.col && v.row === square.row)
+}
+
+export const isPossibleMove = (square: Square, board: Board) =>
+	board.selectedPiece &&
+	board.selectedSquare &&
+	board.selectedPiece.color === board.currentPlayer &&
+	isValidMove(board, board.selectedSquare, square)
 
 export const isChecked = (board: Board) => {
-	const kingSquare = findKingSquare(board.currentPieces, board.currentPlayer)
+	const kingSquare = getSquareFromPieceType(board,["king"], board.currentPlayer).at(0)
 	if (!kingSquare) return false
 	return isSquareThreatened(board, kingSquare, board.currentPlayer)
 }

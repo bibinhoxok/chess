@@ -1,5 +1,5 @@
 import { Board, Color, Piece, Square } from "@/lib/types/main"
-import { getPieceAt } from "../utils"
+import { getPieceAt } from "../board/utils"
 import { isSquareOnBoard } from "../board/conditions"
 import { isEnPassant, isPromotion } from "../board/special-move-conditions"
 

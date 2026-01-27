@@ -4,7 +4,7 @@ import ChessPiece from "./chess-piece"
 import { Board, Piece, Square } from "@/lib/types/main"
 import { useRef } from "react"
 import { handlePieceMove } from "@/lib/handlers/piece-moves"
-import { isValidMove } from "@/lib/controls/board/conditions"
+import { isChecked, isCheckedKing, isPossibleMove, isThreatingKing } from "@/lib/controls/board/conditions"
 import { AnimatePresence, motion } from "motion/react"
 import PromotionSelection from "./promotion-selection"
 
@@ -21,7 +21,6 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		selectedSquare,
 		setPromotionSquare,
 		promotionSquare,
-		findCheckedKing,
 	} = useChessboard()
 
 	const board: Board = {
@@ -50,21 +49,8 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		scaledSquareSize: boardSize.squareSize * boardSize.scale,
 	}
 
-	const isCheckedKing = (square: Square, board: Board) => {
-		const checkedKing = findCheckedKing(board)
-		if (checkedKing?.col === square.col && checkedKing.row === square.row)
-			return true
-		return false
-	}
-
-	const isPossibleMove = (square: Square) =>
-		selectedPiece &&
-		selectedSquare &&
-		selectedPiece.color === currentPlayer &&
-		isValidMove(selectedSquare, selectedPiece, board, square)
 
 	const handleDrop = (
-		piece: Piece,
 		event: MouseEvent | TouchEvent | PointerEvent,
 	) => {
 		if (!boardRef.current) return
@@ -96,7 +82,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 			(y - boardScale.scaledBorderSize) / boardScale.scaledSquareSize,
 		)
 		const to = { row, col }
-		if (selectedPiece && selectedSquare && isPossibleMove({ row, col })) {
+		if (selectedPiece && selectedSquare && isPossibleMove({ row, col },board)) {
 			handlePieceMove(
 				board,
 				selectedSquare,
@@ -144,6 +130,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 								row: Math.floor(index / 8),
 								col: index % 8,
 							}
+							const isCheckedSource = isChecked(board) && (isCheckedKing( square, board) || isThreatingKing(square,board))
 							return (
 								<motion.div
 									onClick={() => handleSquareClick(square)}
@@ -169,13 +156,10 @@ const Chessboard = ({ scale }: { scale: number }) => {
 												square.row &&
 											selectedSquare?.col === square.col
 										}
-										isCheckedKing={isCheckedKing(
-											square,
-											board,
-										)}
+										isCheckedSource={isCheckedSource}
 										onDrop={handleDrop}
 									/>
-									{isPossibleMove(square) &&
+									{isPossibleMove(square,board) &&
 										selectedPiece && (
 											<div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
 												<div

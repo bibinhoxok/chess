@@ -38,10 +38,9 @@ type ChessPieceProps = {
 	scale: number
 	isSelected: boolean
 	onDrop: (
-		piece: Piece,
 		event: MouseEvent | TouchEvent | PointerEvent,
 	) => void
-	isCheckedKing?: boolean
+	isCheckedSource?: boolean
 	isDraggable?: boolean
 	isClickable?: boolean
 }
@@ -52,7 +51,7 @@ const ChessPiece = ({
 	scaledSquareSize,
 	scale,
 	isSelected,
-	isCheckedKing = false,
+	isCheckedSource = false,
 	onDrop,
 	isDraggable = true,
 	isClickable = true,
@@ -80,7 +79,6 @@ const ChessPiece = ({
 					onDragStart={handleClick}
 					onDragEnd={(event) => {
 						onDrop(
-							piece,
 							event as MouseEvent | TouchEvent | PointerEvent,
 						)
 					}}
@@ -108,7 +106,7 @@ const ChessPiece = ({
 							}}
 						/>
 					)}
-					{isCheckedKing && (
+					{isCheckedSource && (
 						<div
 							className="origin-center absolute pixelated filter-yellow chess-sprite"
 							style={{

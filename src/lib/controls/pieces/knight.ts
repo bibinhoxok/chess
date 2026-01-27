@@ -1,5 +1,5 @@
 import { Board, Color, Piece, Square } from "@/lib/types/main"
-import { getSingleMoveInDirection } from "../utils"
+import { getSingleMoveInDirection } from "../board/moves"
 
 export const getPossibleKnightMoves = (
 	from: Square,
