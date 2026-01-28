@@ -20,61 +20,34 @@ export const handlePieceMove = (
 	setPromotionSquare: (square: Square) => void,
 ) => {
 	const piece = board.currentPieces[from.row][from.col] as Piece
-	const pieceMove: PieceMove = {
-		from,
-		to,
-		piece,
-	}
+	const pieceMove: PieceMove = { from, to, piece }
 	const moveType = getMoveType(board, pieceMove)
 	const handleCastlingMove = () => {
-		const kingMove: PieceMove = {
-			from,
-			to,
-			piece,
-		}
+		const kingMove: PieceMove = { from, to, piece }
 		const rookCol = to.col > from.col ? 7 : 0
 		const rookToCol = to.col > from.col ? 5 : 3
 		const rook = board.currentPieces[from.row][rookCol] as Piece
 		const rookSquare = { row: from.row, col: rookCol }
-		const rookMove: PieceMove = {
-			from: rookSquare,
-			to: { row: from.row, col: rookToCol },
-			piece: rook,
-		}
-		const castlingMove: CastlingMove = {
-			type: "castling",
-			kingMove,
-			rookMove,
-		}
+		const rookMove: PieceMove = { from: rookSquare, to: { row: from.row, col: rookToCol }, piece: rook }
+		const castlingMove: CastlingMove = { type: "castling", kingMove, rookMove }
 		movePiece(castlingMove)
 	}
 	const handleEnPassantMove = () => {
 		const capturedPawnSquare: Square = { row: from.row, col: to.col }
-		const capturedPiece = board.currentPieces[capturedPawnSquare.row][
-			capturedPawnSquare.col
-		] as Piece
-		const enPassantMove: EnPassantMove = {
-			type: "enPassant",
-			from,
-			to,
-			piece,
-			capturedPiece,
-		}
+		const capturedPiece = board.currentPieces[capturedPawnSquare.row][capturedPawnSquare.col] as Piece
+		const enPassantMove: EnPassantMove = { type: "enPassant", from, to, piece, capturedPiece }
 		movePiece(enPassantMove)
 	}
+
 	const handlePromotionMove = () => {
 		setPromotionSquare(to)
 	}
+
 	const handleRegularMove = () => {
-		const regularMove: RegularMove = {
-			type: "regular",
-			from,
-			to,
-			piece,
-			capturedPiece: board.currentPieces[to.row][to.col] || undefined,
-		}
+		const regularMove: RegularMove = { type: "regular", from, to, piece, capturedPiece: board.currentPieces[to.row][to.col] || undefined }
 		movePiece(regularMove)
 	}
+
 	const handleMove = {
 		castling: handleCastlingMove,
 		enPassant: handleEnPassantMove,

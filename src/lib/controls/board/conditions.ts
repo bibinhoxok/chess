@@ -1,7 +1,7 @@
 import { Square, Color, Board, Piece, GameStatus } from "@/lib/types/main"
 import { getPawnCaptureMoves } from "@/lib/controls/pieces/pawn"
 import { getPossibleMoves } from "./moves"
-import { getCheckedKing, getPieceAt, getSquareFromPieceType, getThreatingPieces, simulateMove } from "./utils"
+import { getPieceAt, getSquareFromPieceType, getThreatingPieces, simulateMove } from "./utils"
 
 export const isSquareOnBoard = (square: Square) => {
 	return (
@@ -9,22 +9,24 @@ export const isSquareOnBoard = (square: Square) => {
 	)
 }
 
-const isPseudoLegalMove = (
-	board: Board,
-	from: Square,
-	to: Square,
-) => {
-	const possibleMoves = getPossibleMoves(from, board)
-	return possibleMoves.some(
-		(move) => move.col === to.col && move.row === to.row,
-	)
+export const areSameSquare = (s1: Square | null | undefined, s2: Square | null | undefined) => {
+	if (!s1 || !s2) return false
+	return s1.row === s2.row && s1.col === s2.col
 }
 
-export const isSquareThreatened = (
-	board: Board,
-	square: Square,
-	defendingColor: Color,
-) => {
+const isPseudoLegalMove = (board: Board, from: Square, to: Square) => {
+	const possibleMoves = getPossibleMoves(from, board)
+	return possibleMoves.some(move => move.col === to.col && move.row === to.row)
+}
+
+export const isPieceCanMove = (board: Board, pieceSquare: Square) => {
+	const piece = getPieceAt(pieceSquare, board)
+	if (!piece) return false
+	const possibleMoves = getPossibleMoves(pieceSquare, board)
+	return piece.color === board.currentPlayer && possibleMoves.length > 0
+}
+
+export const isSquareThreatened = (board: Board, square: Square, defendingColor: Color) => {
 	const attackingColor: Color = defendingColor === "white" ? "black" : "white"
 	return board.currentPieces.some((row, rowIndex) => {
 		return row.some((piece, colIndex) => {
@@ -32,11 +34,8 @@ export const isSquareThreatened = (
 				const from = { row: rowIndex, col: colIndex }
 				if (piece.name === "pawn") {
 					if (
-						getPawnCaptureMoves(piece.color, from, board).some(
-							(move) =>
-								move.col === square.col &&
-								move.row === square.row,
-						)
+						getPawnCaptureMoves(piece.color, from, board)
+							.some(move => areSameSquare(move, square))
 					) {
 						return true
 					}
@@ -51,11 +50,7 @@ export const isSquareThreatened = (
 	})
 }
 
-export const isValidMove = (
-	board: Board,
-	from: Square,
-	to: Square,
-) => {
+export const isValidMove = (board: Board, from: Square, to: Square) => {
 	const piece = getPieceAt(from, board)
 	if (!piece || !isPseudoLegalMove(board, from, to)) {
 		return false
@@ -65,7 +60,7 @@ export const isValidMove = (
 	const kingSquare =
 		piece.name === "king"
 			? to
-			:  getSquareFromPieceType(boardAfterMove,["king"],piece.color).at(0)
+			: getSquareFromPieceType(boardAfterMove, ["king"], piece.color).at(0)
 
 	if (!kingSquare) return true
 
@@ -78,23 +73,23 @@ const hasValidMoves = (board: Board) => {
 			if (piece && piece.color === board.currentPlayer) {
 				const from = { row: rowIndex, col: colIndex }
 				const possibleMoves = getPossibleMoves(from, board)
-				return possibleMoves.some((move) =>
-					isValidMove(board, from, move),
-				)
+				return possibleMoves.some(move => isValidMove(board, from, move))
 			}
 			return false
 		}),
 	)
 }
 export const isCheckedKing = (square: Square, board: Board) => {
-	const checkedKingSquare = getCheckedKing(board)
-	return checkedKingSquare?.col === square.col && checkedKingSquare.row === square.row
+	const checkedKingSquare = isChecked(board)
+		? getSquareFromPieceType(board, ["king"], board.currentPlayer).at(0)
+		: null
+	return areSameSquare(checkedKingSquare, square)
 }
 
 export const isThreatingKing = (square: Square, board: Board) => {
-	const kingSquare = getSquareFromPieceType(board,["king"], board.currentPlayer).at(0)
+	const kingSquare = getSquareFromPieceType(board, ["king"], board.currentPlayer).at(0)
 	const threatingPieceSquares = getThreatingPieces(board, kingSquare!) //king is always on the board
-	return threatingPieceSquares.some(v => v.col === square.col && v.row === square.row)
+	return threatingPieceSquares.some(v => areSameSquare(v, square))
 }
 
 export const isPossibleMove = (square: Square, board: Board) =>
@@ -104,7 +99,7 @@ export const isPossibleMove = (square: Square, board: Board) =>
 	isValidMove(board, board.selectedSquare, square)
 
 export const isChecked = (board: Board) => {
-	const kingSquare = getSquareFromPieceType(board,["king"], board.currentPlayer).at(0)
+	const kingSquare = getSquareFromPieceType(board, ["king"], board.currentPlayer).at(0)
 	if (!kingSquare) return false
 	return isSquareThreatened(board, kingSquare, board.currentPlayer)
 }
@@ -132,15 +127,9 @@ export const isInsufficientMaterial = (board: Board) => {
 			(item): item is { piece: Piece; square: Square } => item !== null,
 		)
 
-	const nonKingPieces = piecesWithSquares.filter(
-		(p) => p.piece.name !== "king",
-	)
-	const whiteNonKingPieces = nonKingPieces.filter(
-		(p) => p.piece.color === "white",
-	)
-	const blackNonKingPieces = nonKingPieces.filter(
-		(p) => p.piece.color === "black",
-	)
+	const nonKingPieces = piecesWithSquares.filter(p => p.piece.name !== "king")
+	const whiteNonKingPieces = nonKingPieces.filter(p => p.piece.color === "white")
+	const blackNonKingPieces = nonKingPieces.filter(p => p.piece.color === "black")
 
 	// Case 1: King vs King
 	if (nonKingPieces.length === 0) {
@@ -159,20 +148,16 @@ export const isInsufficientMaterial = (board: Board) => {
 	if (
 		nonKingPieces.length === 2 &&
 		(whiteNonKingPieces.length === 2 || blackNonKingPieces.length === 2) &&
-		nonKingPieces.every((p) => p.piece.name === "knight")
+		nonKingPieces.every(p => p.piece.name === "knight")
 	) {
 		return true
 	}
 
 	// Case 4: Both sides only have bishops, and all are on same-colored squares.
-	const bishops = nonKingPieces.filter((p) => p.piece.name === "bishop")
+	const bishops = nonKingPieces.filter(p => p.piece.name === "bishop")
 	if (bishops.length === nonKingPieces.length && nonKingPieces.length > 0) {
-		const firstBishopSquareColor =
-			(bishops[0].square.row + bishops[0].square.col) % 2
-		return bishops.every((b) => {
-			const color = (b.square.row + b.square.col) % 2
-			return color === firstBishopSquareColor
-		})
+		const firstBishopSquareColor = (bishops[0].square.row + bishops[0].square.col) % 2
+		return bishops.every(b => (b.square.row + b.square.col) % 2 === firstBishopSquareColor)
 	}
 
 	return false

@@ -1,5 +1,5 @@
 import { Board, Piece, PieceMove, Square } from "@/lib/types/main"
-import { isSquareThreatened } from "./conditions"
+import { areSameSquare, isSquareThreatened } from "./conditions"
 
 export const isCastling = (
 	board: Board,
@@ -89,9 +89,7 @@ export const isEnPassant = (
 	// 2. The last move must have been that pawn moving two squares forward.
 	const wasTwoSquareAdvance =
 		Math.abs(lastMove.from.row - lastMove.to.row) === 2
-	const isCorrectPiece =
-		lastMove.to.row === capturedSquare.row &&
-		lastMove.to.col === capturedSquare.col
+	const isCorrectPiece = areSameSquare(lastMove.to, capturedSquare)
 
 	if (!wasTwoSquareAdvance || !isCorrectPiece) {
 		return false

@@ -59,9 +59,7 @@ const ChessPiece = ({
 	const { selectPiece } = useChessboard()
 
 	const handleClick = () => {
-		if (isClickable && piece) {
-			selectPiece(currentSquare, piece)
-		}
+		if (isClickable && piece) selectPiece(currentSquare, piece)
 	}
 	return (
 		<div

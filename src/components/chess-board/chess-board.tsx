@@ -1,10 +1,10 @@
 "use client"
 import useChessboard from "@/lib/store/use-chess-board"
 import ChessPiece from "./chess-piece"
-import { Board, Piece, Square } from "@/lib/types/main"
+import { Board, Square } from "@/lib/types/main"
 import { useRef } from "react"
 import { handlePieceMove } from "@/lib/handlers/piece-moves"
-import { isChecked, isCheckedKing, isPossibleMove, isThreatingKing } from "@/lib/controls/board/conditions"
+import { areSameSquare, isChecked, isCheckedKing, isPieceCanMove, isPossibleMove, isThreatingKing } from "@/lib/controls/board/conditions"
 import { AnimatePresence, motion } from "motion/react"
 import PromotionSelection from "./promotion-selection"
 
@@ -75,14 +75,10 @@ const Chessboard = ({ scale }: { scale: number }) => {
 			y = boardRect.height - y
 		}
 
-		const col = Math.floor(
-			(x - boardScale.scaledBorderSize) / boardScale.scaledSquareSize,
-		)
-		const row = Math.floor(
-			(y - boardScale.scaledBorderSize) / boardScale.scaledSquareSize,
-		)
+		const col = Math.floor((x - boardScale.scaledBorderSize) / boardScale.scaledSquareSize)
+		const row = Math.floor((y - boardScale.scaledBorderSize) / boardScale.scaledSquareSize)
 		const to = { row, col }
-		if (selectedPiece && selectedSquare && isPossibleMove({ row, col },board)) {
+		if (selectedPiece && selectedSquare && isPossibleMove({ row, col }, board)) {
 			handlePieceMove(
 				board,
 				selectedSquare,
@@ -126,21 +122,12 @@ const Chessboard = ({ scale }: { scale: number }) => {
 						}}
 					>
 						{currentPieces.flat().map((piece, index) => {
-							const square: Square = {
-								row: Math.floor(index / 8),
-								col: index % 8,
-							}
-							const isCheckedSource = isChecked(board) && (isCheckedKing( square, board) || isThreatingKing(square,board))
+							const square: Square = { row: Math.floor(index / 8), col: index % 8 }
 							return (
 								<motion.div
 									onClick={() => handleSquareClick(square)}
-									animate={{
-										rotate:
-											currentPlayer === "white" ? 180 : 0,
-									}}
-									transition={{
-										duration: 0.5,
-									}}
+									animate={{ rotate: currentPlayer === "white" ? 180 : 0 }}
+									transition={{ duration: 0.5 }}
 									key={index}
 									className="relative"
 								>
@@ -151,26 +138,22 @@ const Chessboard = ({ scale }: { scale: number }) => {
 											boardScale.scaledSquareSize
 										}
 										scale={boardSize.scale}
-										isSelected={
-											selectedSquare?.row ===
-												square.row &&
-											selectedSquare?.col === square.col
-										}
-										isCheckedSource={isCheckedSource}
+										isSelected={areSameSquare(selectedSquare, square)}
+										isDraggable={isPieceCanMove(board, square)}
+										isCheckedSource={isChecked(board) && (isCheckedKing(square, board) || isThreatingKing(square, board))}
 										onDrop={handleDrop}
 									/>
-									{isPossibleMove(square,board) &&
-										selectedPiece && (
-											<div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-												<div
-													className="bg-[url('/pixel_chess_16x16_byBrysia/set_regular/circle.png')] bg-contain bg-no-repeat pixelated"
-													style={{
-														width: `${boardScale.scaledSquareSize}px`,
-														height: `${boardScale.scaledSquareSize}px`,
-													}}
-												/>
-											</div>
-										)}
+									{isPossibleMove(square, board) && selectedPiece && (
+										<div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+											<div
+												className="bg-[url('/pixel_chess_16x16_byBrysia/set_regular/circle.png')] bg-contain bg-no-repeat pixelated"
+												style={{
+													width: `${boardScale.scaledSquareSize}px`,
+													height: `${boardScale.scaledSquareSize}px`,
+												}}
+											/>
+										</div>
+									)}
 								</motion.div>
 							)
 						})}

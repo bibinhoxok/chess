@@ -1,5 +1,5 @@
 import { Board, Color, Piece, PieceName, Square } from "@/lib/types/main"
-import { isChecked, isSquareOnBoard } from "./conditions"
+import { isSquareOnBoard } from "./conditions"
 import { createNewCurrentPieces, getPossibleMoves } from "./moves"
 
 export const getPieceAt = (square: Square, board: Board): Piece | null => {
@@ -16,7 +16,7 @@ export const getSquareFromPieceType = (board: Board, pieceNames?: PieceName[], c
 		if (!color) return true
 		return pieceColor === color
 	}
-	const result = board.currentPieces
+	return board.currentPieces
 		.map((row, rowIndex) => {
 			return row.map((piece, colIndex) => {
 				if (piece && pieceNameFilter(piece.name) && colorFilter(piece.color)) {
@@ -26,15 +26,8 @@ export const getSquareFromPieceType = (board: Board, pieceNames?: PieceName[], c
 			})
 		})
 		.flat()
-	return result.filter((square) => square !== undefined)
+		.filter((square) => square !== undefined)
 }
-
-
-
-export const getCheckedKing = (board: Board) =>
-	isChecked(board)
-		? getSquareFromPieceType(board,["king"],board.currentPlayer).at(0)
-		: null
 
 export const simulateMove = (board: Board, from: Square, to: Square): Board => {
 	const pieceToMove = board.currentPieces[from.row][from.col]
@@ -47,10 +40,10 @@ export const simulateMove = (board: Board, from: Square, to: Square): Board => {
 	return { ...board, currentPieces: newPieces }
 }
 
-export const getThreatingPieces = ( board: Board, tagetPieceSquare: Square)=> {
+export const getThreatingPieces = (board: Board, tagetPieceSquare: Square) => {
 	const tagetPiece = getPieceAt(tagetPieceSquare, board)
 	if (!tagetPiece) return []
-	const squares = board.currentPieces
+	return board.currentPieces
 		.map((row, rowIndex) => {
 			return row.map((piece, colIndex) => {
 				const isOpponentPiece = piece && piece.color !== tagetPiece.color
@@ -63,6 +56,5 @@ export const getThreatingPieces = ( board: Board, tagetPieceSquare: Square)=> {
 			})
 		})
 		.flat()
-
-	return squares.filter((square) => square !== undefined)
+		.filter((square) => square !== undefined)
 }

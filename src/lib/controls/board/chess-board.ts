@@ -1,4 +1,4 @@
-import { Board, Move, Piece, Square } from "@/lib/types/main"
+import { Board, Piece } from "@/lib/types/main"
 import { bishop } from "../pieces/bishop"
 import { king } from "../pieces/king"
 import { knight } from "../pieces/knight"
