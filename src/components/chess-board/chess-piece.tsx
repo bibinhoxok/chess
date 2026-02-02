@@ -1,35 +1,9 @@
 import useChessboard from "@/lib/store/use-chess-board"
 import { PieceName, Piece, Square } from "@/lib/types/main"
 import { motion } from "motion/react"
-
-// The order of pieces in the sprite sheet
-const pieceOrder: PieceName[] = [
-	"rook",
-	"knight",
-	"bishop",
-	"queen",
-	"king",
-	"pawn",
-]
-const spriteSheet = {
-	white: "/pixel_chess_16x16_byBrysia/set_regular/pieces_white_1.png",
-	black: "/pixel_chess_16x16_byBrysia/set_regular/pieces_black_1.png",
-	hightlight:
-		"/pixel_chess_16x16_byBrysia/set_regular/pieces_highlighted.png",
-}
-
-const offsetSpriteSheet = (pieceName: PieceName, spriteSheet: string) => {
-	const index = pieceOrder.indexOf(pieceName)
-	if (index === -1) return {}
-
-	const xOffset = index * 15
-	const yOffset = 0
-
-	return {
-		backgroundImage: `url(${spriteSheet})`,
-		backgroundPosition: `-${xOffset}px -${yOffset}px`,
-	}
-}
+import { Z_INDEX } from "@/lib/utils/z-index"
+import { offsetSpriteSheet } from "@/lib/utils/offsets"
+import { ASSETS } from "@/lib/utils/assets"
 
 type ChessPieceProps = {
 	piece: Piece | null
@@ -85,11 +59,12 @@ const ChessPiece = ({
 					dragSnapToOrigin
 					className="origin-center pixelated chess-sprite"
 					style={{
+						zIndex: isSelected ? Z_INDEX.selectedPiece : Z_INDEX.piece,
 						...offsetSpriteSheet(
 							piece.name,
 							piece.color === "black"
-								? spriteSheet.black
-								: spriteSheet.white,
+								? ASSETS.sprites.black
+								: ASSETS.sprites.white,
 						),
 					}}
 				>
@@ -99,7 +74,7 @@ const ChessPiece = ({
 							style={{
 								...offsetSpriteSheet(
 									piece.name,
-									spriteSheet.hightlight,
+									ASSETS.sprites.highlight,
 								),
 							}}
 						/>
@@ -110,7 +85,7 @@ const ChessPiece = ({
 							style={{
 								...offsetSpriteSheet(
 									piece.name,
-									spriteSheet.hightlight,
+									ASSETS.sprites.highlight,
 								),
 							}}
 						/>

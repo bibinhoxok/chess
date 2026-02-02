@@ -7,6 +7,9 @@ import { handlePieceMove } from "@/lib/handlers/piece-moves"
 import { areSameSquare, isChecked, isCheckedKing, isPieceCanMove, isPossibleMove, isThreatingKing } from "@/lib/controls/board/conditions"
 import { AnimatePresence, motion } from "motion/react"
 import PromotionSelection from "./promotion-selection"
+import { Z_INDEX } from "@/lib/utils/z-index"
+import { calculateBoardScale } from "@/lib/utils/scaling"
+import { ASSETS } from "@/lib/utils/assets"
 
 const Chessboard = ({ scale }: { scale: number }) => {
 	const {
@@ -36,18 +39,9 @@ const Chessboard = ({ scale }: { scale: number }) => {
 	const boardRef = useRef<HTMLDivElement>(null)
 
 	// Board scale
-	const boardSize = {
-		scale,
-		boardImageSize: 128,
-		borderSize: 4,
-		squareSize: 15,
-	}
+	const boardScale = calculateBoardScale(scale)
 
-	const boardScale = {
-		scaledBoardImageSize: boardSize.boardImageSize * boardSize.scale,
-		scaledBorderSize: boardSize.borderSize * boardSize.scale,
-		scaledSquareSize: boardSize.squareSize * boardSize.scale,
-	}
+	const isCurrentChecked = isChecked(board)
 
 
 	const handleDrop = (
@@ -106,8 +100,9 @@ const Chessboard = ({ scale }: { scale: number }) => {
 						duration: 0.5,
 					}}
 					ref={boardRef}
-					className="relative bg-[url('/pixel_chess_16x16_byBrysia/boards_additional_colors/board_purple.png')] bg-[length:100%_100%] [image-rendering:pixelated]"
+					className="relative bg-[length:100%_100%] [image-rendering:pixelated]"
 					style={{
+						backgroundImage: `url(${ASSETS.boards.purple})`,
 						width: `${boardScale.scaledBoardImageSize}px`,
 						height: `${boardScale.scaledBoardImageSize}px`,
 					}}
@@ -127,6 +122,11 @@ const Chessboard = ({ scale }: { scale: number }) => {
 								<motion.div
 									onClick={() => handleSquareClick(square)}
 									animate={{ rotate: currentPlayer === "white" ? 180 : 0 }}
+									style={{
+										zIndex: areSameSquare(selectedSquare, square)
+											? Z_INDEX.selectedSquare
+											: Z_INDEX.default,
+									}}
 									transition={{ duration: 0.5 }}
 									key={index}
 									className="relative"
@@ -137,17 +137,18 @@ const Chessboard = ({ scale }: { scale: number }) => {
 										scaledSquareSize={
 											boardScale.scaledSquareSize
 										}
-										scale={boardSize.scale}
+										scale={scale}
 										isSelected={areSameSquare(selectedSquare, square)}
 										isDraggable={isPieceCanMove(board, square)}
-										isCheckedSource={isChecked(board) && (isCheckedKing(square, board) || isThreatingKing(square, board))}
+										isCheckedSource={isCurrentChecked && (isCheckedKing(square, board) || isThreatingKing(square, board))}
 										onDrop={handleDrop}
 									/>
 									{isPossibleMove(square, board) && selectedPiece && (
 										<div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
 											<div
-												className="bg-[url('/pixel_chess_16x16_byBrysia/set_regular/circle.png')] bg-contain bg-no-repeat pixelated"
+												className="bg-contain bg-no-repeat pixelated"
 												style={{
+													backgroundImage: `url(${ASSETS.ui.circle})`,
 													width: `${boardScale.scaledSquareSize}px`,
 													height: `${boardScale.scaledSquareSize}px`,
 												}}

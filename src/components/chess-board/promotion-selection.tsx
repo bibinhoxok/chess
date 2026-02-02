@@ -4,6 +4,7 @@ import BorderedBox from "../gui/bordered-box"
 import { pieces } from "@/lib/controls/pieces"
 import ChessPiece from "./chess-piece"
 import { motion } from "motion/react"
+import { Z_INDEX } from "@/lib/utils/z-index"
 
 const promotionPieces: PieceName[] = ["queen", "rook", "bishop", "knight"]
 
@@ -11,7 +12,10 @@ const PromotionSelection = () => {
 	const { handlePromotion, currentPlayer } = useChessboard()
 
 	return (
-		<div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+		<div
+			className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+			style={{ zIndex: Z_INDEX.promotionSelection }}
+		>
 			<BorderedBox width={4} height={1} scale={10}>
 				<div className="flex">
 					{promotionPieces.map((pieceName) => (
