@@ -33,9 +33,8 @@ export const handlePieceMove = (
 		movePiece(castlingMove)
 	}
 	const handleEnPassantMove = () => {
-		const capturedPawnSquare: Square = { row: from.row, col: to.col }
-		const capturedPiece = board.currentPieces[capturedPawnSquare.row][capturedPawnSquare.col] as Piece
-		const enPassantMove: EnPassantMove = { type: "enPassant", from, to, piece, capturedPiece }
+		const capturedSquare: Square = { row: from.row, col: to.col }
+		const enPassantMove: EnPassantMove = { type: "enPassant", from, to, piece, capturedSquare }
 		movePiece(enPassantMove)
 	}
 
