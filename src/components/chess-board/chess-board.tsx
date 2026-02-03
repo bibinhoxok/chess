@@ -4,7 +4,7 @@ import ChessPiece from "./chess-piece"
 import { Board, Square } from "@/lib/types/main"
 import { useRef } from "react"
 import { handlePieceMove } from "@/lib/handlers/piece-moves"
-import { areSameSquare, isChecked, isCheckedKing, isPieceCanMove, isPossibleMove, isThreatingKing } from "@/lib/controls/board/conditions"
+import { areSameSquare, isChecked, isPieceCanMove, isPossibleMove, isThreatingKing } from "@/lib/controls/board/conditions"
 import { AnimatePresence, motion } from "motion/react"
 import PromotionSelection from "./promotion-selection"
 import { Z_INDEX } from "@/lib/utils/z-index"
@@ -118,6 +118,9 @@ const Chessboard = ({ scale }: { scale: number }) => {
 					>
 						{currentPieces.flat().map((piece, index) => {
 							const square: Square = { row: Math.floor(index / 8), col: index % 8 }
+							if (!piece) return null
+							const isCheckedSource = isCurrentChecked &&
+								((piece.color === currentPlayer && isChecked(board)) || isThreatingKing(square, board))
 							return (
 								<motion.div
 									onClick={() => handleSquareClick(square)}
@@ -140,7 +143,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 										scale={scale}
 										isSelected={areSameSquare(selectedSquare, square)}
 										isDraggable={isPieceCanMove(board, square)}
-										isCheckedSource={isCurrentChecked && (isCheckedKing(square, board) || isThreatingKing(square, board))}
+										isCheckedSource={isCheckedSource}
 										onDrop={handleDrop}
 									/>
 									{isPossibleMove(square, board) && selectedPiece && (

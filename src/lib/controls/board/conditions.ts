@@ -83,12 +83,6 @@ const hasValidMoves = (board: Board) => {
 		}),
 	)
 }
-export const isCheckedKing = (square: Square, board: Board) => {
-	const checkedKingSquare = isChecked(board)
-		? getSquareFromPieceType(board, ["king"], board.currentPlayer).at(0)
-		: null
-	return areSameSquare(checkedKingSquare, square)
-}
 
 export const isThreatingKing = (square: Square, board: Board) => {
 	const kingSquare = getSquareFromPieceType(board, ["king"], board.currentPlayer).at(0)
