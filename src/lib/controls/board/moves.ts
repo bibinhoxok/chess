@@ -61,8 +61,8 @@ export const getSingleMoveInDirection = (
 }
 
 
-export const getPossibleMoves = (tagetPieceSquare: Square, board: Board) => {
-	const piece = getPieceAt(tagetPieceSquare, board)
+export const getPossibleMoves = (targetPieceSquare: Square, board: Board) => {
+	const piece = getPieceAt(targetPieceSquare, board)
 	if (!piece) return []
 	const moves = {
 		pawn: getPossiblePawnMoves,
@@ -72,22 +72,23 @@ export const getPossibleMoves = (tagetPieceSquare: Square, board: Board) => {
 		queen: getPossibleQueenMoves,
 		king: getPossibleKingMoves,
 	}
-	return moves[piece.name](tagetPieceSquare, piece, board)
+	return moves[piece.name](targetPieceSquare, piece, board)
 }
 
 export const createNewCurrentPieces = (board: Board, pieceMoves: PieceMove[], promotePiece?: Piece) =>
-	board.currentPieces.map((row, rowIndex) => {
-		return row.map((piece, colIndex) => {
-			const landingMove = pieceMoves.findLast(move => areSameSquare(move.to, { row: rowIndex, col: colIndex }))
-			if (landingMove) {
-				if (promotePiece) return promotePiece
-				return landingMove.piece
-			}
-			if (pieceMoves.some(move => areSameSquare(move.from, { row: rowIndex, col: colIndex }))) return null
-			return piece
+	pieceMoves.reduce((currentBoard, move) => {
+		return currentBoard.map((row, rowIndex) => {
+			return row.map((piece, colIndex) => {
+				const landingMove = areSameSquare(move.to, { row: rowIndex, col: colIndex })
+				if (landingMove) {
+					if (promotePiece) return promotePiece
+					return move.piece
+				}
+				if (areSameSquare(move.from, { row: rowIndex, col: colIndex })) return null
+				return piece
+			})
 		})
-	})
-
+	}, board.currentPieces)
 const regularMove = (board: Board, move: RegularMove): Board => ({
 	...board,
 	currentPieces: createNewCurrentPieces(board, [move]),
@@ -110,8 +111,11 @@ const castlingMove = (board: Board, move: CastlingMove): Board => ({
 
 const enPassantMove = (board: Board, move: EnPassantMove): Board => ({
 	...board,
-	//Move the captured piece to the destination first, then the pawn move and capture it
-	currentPieces: createNewCurrentPieces(board, [{ from: move.from, to: move.to, piece: move.piece } as PieceMove, move]),
+	// Move the pawn to the captured square to remove the enemy piece, then move to the final destination
+	currentPieces: createNewCurrentPieces(board, [
+		{ from: move.from, to: move.capturedSquare, piece: move.piece } as PieceMove,
+		{ from: move.capturedSquare, to: move.to, piece: move.piece } as PieceMove,
+	]),
 	currentPlayer: board.currentPlayer === "white" ? "black" : "white",
 	gameHistory: [...board.gameHistory, move],
 })
