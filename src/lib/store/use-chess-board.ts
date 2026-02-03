@@ -10,6 +10,7 @@ import {
 import { chessBoard } from "@/lib/controls/board/chess-board"
 import { getPossibleMoves, movePiece } from "../controls/board/moves"
 import { pieces } from "../controls/pieces"
+import { isCheckedMate } from "../controls/board/conditions"
 
 type BoardState = Board & {
 	movePiece: (move: Move) => void
@@ -32,6 +33,11 @@ const useChessboard = create<BoardState>((set, get) => ({
 		})),
 	selectPiece: (from, piece) =>
 		set((state) => {
+			if (isCheckedMate(state)) return {
+				selectedPiece: null,
+				selectedSquare: null,
+				possibleMoves: [],
+			}
 			const moves = getPossibleMoves(from, state)
 			return {
 				selectedPiece: piece,
