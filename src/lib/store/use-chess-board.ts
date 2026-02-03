@@ -33,12 +33,14 @@ const useChessboard = create<BoardState>((set, get) => ({
 		})),
 	selectPiece: (from, piece) =>
 		set((state) => {
-			if (isCheckedMate(state)) return {
+			const deselected = {
 				selectedPiece: null,
 				selectedSquare: null,
 				possibleMoves: [],
 			}
+			if (isCheckedMate(state)) return deselected
 			const moves = getPossibleMoves(from, state)
+			if (moves.length < 1) return deselected
 			return {
 				selectedPiece: piece,
 				selectedSquare: from,

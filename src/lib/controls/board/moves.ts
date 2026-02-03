@@ -10,7 +10,7 @@ import {
 	CastlingMove,
 	EnPassantMove,
 } from "@/lib/types/main"
-import { areSameSquare, isSquareOnBoard } from "./conditions"
+import { areSameSquare, isSquareOnBoard, isValidMove } from "./conditions"
 import { getPieceAt } from "./utils";
 import { getPossiblePawnMoves } from "../pieces/pawn";
 import { getPossibleRookMoves } from "../pieces/rook";
@@ -61,7 +61,7 @@ export const getSingleMoveInDirection = (
 }
 
 
-export const getPossibleMoves = (targetPieceSquare: Square, board: Board) => {
+export const getPseudoLegalMoves = (targetPieceSquare: Square, board: Board) => {
 	const piece = getPieceAt(targetPieceSquare, board)
 	if (!piece) return []
 	const moves = {
@@ -73,6 +73,10 @@ export const getPossibleMoves = (targetPieceSquare: Square, board: Board) => {
 		king: getPossibleKingMoves,
 	}
 	return moves[piece.name](targetPieceSquare, piece, board)
+}
+
+export const getPossibleMoves = (targetPieceSquare: Square, board: Board) => {
+	return getPseudoLegalMoves(targetPieceSquare, board).filter(v => isValidMove(board, targetPieceSquare, v))
 }
 
 export const createNewCurrentPieces = (board: Board, pieceMoves: PieceMove[], promotePiece?: Piece) =>
