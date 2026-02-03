@@ -6,7 +6,6 @@ import {
 	Move,
 	PieceName,
 	PromotionMove,
-	Color,
 } from "@/lib/types/main"
 import { chessBoard } from "@/lib/controls/board/chess-board"
 import { getPossibleMoves, movePiece } from "../controls/board/moves"
@@ -53,7 +52,6 @@ const useChessboard = create<BoardState>((set, get) => ({
 			type: "promotion",
 			from,
 			to,
-			piece,
 			promotionTo: pieces[promotionTo](piece.color),
 			capturedPiece: state.currentPieces[to.row][to.col] || undefined,
 		}

@@ -20,7 +20,7 @@ export const getPossibleKingMoves = (from: Square, piece: Piece, board: Board): 
 	const castlingMoves = board.currentPieces
 		.flatMap((pieceRow, rowIndex) => pieceRow.map((piece, colIndex) => ({ piece, square: { row: rowIndex, col: colIndex } })))
 		.filter(({ piece }) => piece?.name === "rook" && piece.color === color)
-		.filter(({ piece, square }) => isCastling(board, kingPiece, from, piece!, square))
+		.filter(({ piece, square }) => isCastling(board, from,  square))
 		.map(({ square }) => {
 			const castlingDirection = Math.sign(square.col - from.col)
 			return { row: from.row, col: from.col + 2 * castlingDirection }

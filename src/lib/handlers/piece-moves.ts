@@ -3,7 +3,6 @@ import {
 	Board,
 	CastlingMove,
 	EnPassantMove,
-	Piece,
 	PieceMove,
 	PromotionMove,
 	RegularMove,
@@ -19,7 +18,6 @@ export const handlePieceMove = (
 	) => void,
 	setPromotionSquare: (square: Square) => void,
 ) => {
-	const piece = board.currentPieces[from.row][from.col] as Piece
 	const pieceMove: PieceMove = { from, to }
 	const moveType = getMoveType(board, pieceMove)
 	const handleCastlingMove = () => {

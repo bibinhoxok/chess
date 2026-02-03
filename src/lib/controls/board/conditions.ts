@@ -39,6 +39,10 @@ export const isSquareThreatened = (board: Board, square: Square, defendingColor:
 					) {
 						return true
 					}
+				} else if (piece.name === "king") {
+					if (Math.abs(from.row - square.row) <= 1 && Math.abs(from.col - square.col) <= 1) {
+						return true
+					}
 				} else {
 					if (isPseudoLegalMove(board, from, square)) {
 						return true

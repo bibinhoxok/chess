@@ -77,7 +77,8 @@ export const getPossibleMoves = (targetPieceSquare: Square, board: Board) => {
 
 export const createNewCurrentPieces = (board: Board, pieceMoves: PieceMove[], promotePiece?: Piece) =>
 	pieceMoves.reduce((currentBoard, move) => {
-		const movingPiece = getPieceAt(move.from, board)
+		const newboard = {...board,currentPieces:currentBoard}
+		const movingPiece = getPieceAt(move.from, newboard)
 		if (!movingPiece) return currentBoard
 		return currentBoard.map((row, rowIndex) => {
 			return row.map((piece, colIndex) => {
@@ -91,6 +92,7 @@ export const createNewCurrentPieces = (board: Board, pieceMoves: PieceMove[], pr
 			})
 		})
 	}, board.currentPieces)
+	
 const regularMove = (board: Board, move: RegularMove): Board => ({
 	...board,
 	currentPieces: createNewCurrentPieces(board, [move]),

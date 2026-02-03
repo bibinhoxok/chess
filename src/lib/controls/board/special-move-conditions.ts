@@ -1,15 +1,12 @@
 import { Board, Piece, PieceMove, Square } from "@/lib/types/main"
 import { areSameSquare, isSquareThreatened } from "./conditions"
+import { getPieceAt } from "./utils"
 
-export const isCastling = (
-	board: Board,
-	kingPiece: Piece,
-	kingSquare: Square,
-	rookPiece: Piece,
-	rookSquare: Square,
-) => {
+export const isCastling = ( board: Board, kingSquare: Square, rookSquare: Square) => {
+	const kingPiece = getPieceAt(kingSquare,board) as Piece
+
 	// 1. Check if the king or the rook have moved before.
-	if (board.gameHistory.some(move => move.type === "regular" && (move.piece === kingPiece || move.piece === rookPiece))) return false
+	if (board.gameHistory.some(move => move.type === "regular" && (move.from === kingSquare || move.from === rookSquare))) return false
 
 	// 2. Check if there are any pieces between the king and the rook.
 	const startCol = Math.min(kingSquare.col, rookSquare.col)
@@ -66,12 +63,13 @@ export const isPromotion = (pawn: Piece, pawnSquare: Square) => {
 }
 
 export const getMoveType = (board: Board, pieceMove: PieceMove): "regular" | "promotion" | "castling" | "enPassant" => {
-	const { piece, from, to } = pieceMove
+	const { from, to } = pieceMove
+	const piece = getPieceAt(from,board) as Piece
 	if (piece.name === "king" && Math.abs(from.col - to.col) === 2) {
 		const rookCol = to.col > from.col ? 7 : 0
 		const rookSquare = { row: from.row, col: rookCol }
 		const rook = board.currentPieces[from.row][rookCol]
-		if (rook && rook.name === "rook" && isCastling(board, piece, from, rook, rookSquare)) return "castling"
+		if (rook && rook.name === "rook" && isCastling(board, from, rookSquare)) return "castling"
 	}
 
 	if (piece.name === "pawn") {
