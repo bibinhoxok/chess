@@ -34,7 +34,7 @@ export const simulateMove = (board: Board, from: Square, to: Square): Board => {
 	if (!pieceToMove) return board
 
 	const newPieces = createNewCurrentPieces(board, [
-		{ from, to, piece: pieceToMove },
+		{ from, to },
 	])
 
 	return { ...board, currentPieces: newPieces }

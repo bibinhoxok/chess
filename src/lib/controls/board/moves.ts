@@ -77,12 +77,14 @@ export const getPossibleMoves = (targetPieceSquare: Square, board: Board) => {
 
 export const createNewCurrentPieces = (board: Board, pieceMoves: PieceMove[], promotePiece?: Piece) =>
 	pieceMoves.reduce((currentBoard, move) => {
+		const movingPiece = getPieceAt(move.from, board)
+		if (!movingPiece) return currentBoard
 		return currentBoard.map((row, rowIndex) => {
 			return row.map((piece, colIndex) => {
 				const landingMove = areSameSquare(move.to, { row: rowIndex, col: colIndex })
 				if (landingMove) {
 					if (promotePiece) return promotePiece
-					return move.piece
+					return movingPiece
 				}
 				if (areSameSquare(move.from, { row: rowIndex, col: colIndex })) return null
 				return piece
@@ -113,8 +115,8 @@ const enPassantMove = (board: Board, move: EnPassantMove): Board => ({
 	...board,
 	// Move the pawn to the captured square to remove the enemy piece, then move to the final destination
 	currentPieces: createNewCurrentPieces(board, [
-		{ from: move.from, to: move.capturedSquare, piece: move.piece } as PieceMove,
-		{ from: move.capturedSquare, to: move.to, piece: move.piece } as PieceMove,
+		{ from: move.from, to: move.capturedSquare } as PieceMove,
+		{ from: move.capturedSquare, to: move.to } as PieceMove,
 	]),
 	currentPlayer: board.currentPlayer === "white" ? "black" : "white",
 	gameHistory: [...board.gameHistory, move],

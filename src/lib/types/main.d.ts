@@ -10,7 +10,6 @@ export type PieceName = "pawn" | "rook" | "knight" | "bishop" | "queen" | "king"
 export type PieceMove = {
 	from: Square
 	to: Square
-	piece: Piece
 }
 
 export type RegularMove = PieceMove & {
