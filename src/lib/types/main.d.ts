@@ -32,7 +32,7 @@ export type CastlingMove = {
 
 export type EnPassantMove = PieceMove & {
 	type: "enPassant"
-	capturedPiece: Piece // the captured pawn
+	capturedSquare: Square
 }
 
 export type Move = RegularMove | PromotionMove | CastlingMove | EnPassantMove
