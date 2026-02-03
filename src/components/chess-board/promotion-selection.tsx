@@ -31,11 +31,10 @@ const PromotionSelection = () => {
 								<ChessPiece
 									piece={pieces[pieceName](currentPlayer)}
 									currentSquare={{ row: 0, col: 0 }} // Dummy square
-									scaledSquareSize={60}
 									scale={4}
 									isSelected={false}
-									onDrop={() => {}}
-									isDraggable={false}
+									onDrop={() => { }}
+									onClick={() => { }}
 									isClickable={false}
 								/>
 							</motion.div>
