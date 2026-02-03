@@ -1,6 +1,6 @@
 import { Square, Color, Board, Piece, GameStatus } from "@/lib/types/main"
 import { getPawnCaptureMoves } from "@/lib/controls/pieces/pawn"
-import { getPossibleMoves } from "./moves"
+import { getPossibleMoves, getPseudoLegalMoves } from "./moves"
 import { getPieceAt, getSquareFromPieceType, getThreatingPieces, simulateMove } from "./utils"
 
 export const isSquareOnBoard = (square: Square) => {
@@ -15,7 +15,7 @@ export const areSameSquare = (s1: Square | null | undefined, s2: Square | null |
 }
 
 const isPseudoLegalMove = (board: Board, from: Square, to: Square) => {
-	const possibleMoves = getPossibleMoves(from, board)
+	const possibleMoves = getPseudoLegalMoves(from, board)
 	return possibleMoves.some(move => move.col === to.col && move.row === to.row)
 }
 
@@ -77,7 +77,7 @@ const hasValidMoves = (board: Board) => {
 			if (piece && piece.color === board.currentPlayer) {
 				const from = { row: rowIndex, col: colIndex }
 				const possibleMoves = getPossibleMoves(from, board)
-				return possibleMoves.some(move => isValidMove(board, from, move))
+				return possibleMoves.length > 0
 			}
 			return false
 		}),

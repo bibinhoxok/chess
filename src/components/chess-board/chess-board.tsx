@@ -11,7 +11,7 @@ import { Z_INDEX } from "@/lib/utils/z-index"
 import { calculateBoardScale } from "@/lib/utils/scaling"
 import { ASSETS } from "@/lib/utils/assets"
 import ChessSquare from "./chess-square"
-import { getPieceAt } from "@/lib/controls/board/utils"
+import { getPieceAt, getSquareFromPieceType, getThreatingPieces } from "@/lib/controls/board/utils"
 
 const Chessboard = ({ scale }: { scale: number }) => {
 	const {
@@ -19,12 +19,10 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		selectPiece,
 		selectedPiece,
 		possibleMoves,
-		movePiece,
 		currentPlayer,
 		gameHistory,
 		gameStatus,
 		selectedSquare,
-		setPromotionSquare,
 		promotionSquare,
 	} = useChessboard()
 
@@ -45,6 +43,11 @@ const Chessboard = ({ scale }: { scale: number }) => {
 
 	const isCurrentChecked = isChecked(board)
 	const isCurrentCheckedmate = isCheckedMate(board)
+
+	const kingSquare = getSquareFromPieceType(board, ["king"], currentPlayer).at(0)
+	const threateningSquares = isCurrentChecked && kingSquare
+		? getThreatingPieces(board, kingSquare)
+		: []
 
 
 	const handleDrop = (
@@ -90,6 +93,18 @@ const Chessboard = ({ scale }: { scale: number }) => {
 	}
 
 	const handleSquareClick = (square: Square) => {
+		const state = useChessboard.getState()
+		if (state.selectedPiece && state.selectedSquare && isPossibleMove(square, state)) {
+			handlePieceMove(
+				state,
+				state.selectedSquare,
+				square,
+				state.movePiece,
+				state.setPromotionSquare,
+			)
+			return
+		}
+
 		const piece = getPieceAt(square, board)
 		if (piece && piece.color === currentPlayer) {
 			selectPiece(square, piece)
@@ -127,8 +142,8 @@ const Chessboard = ({ scale }: { scale: number }) => {
 							const possibleMove = selectedPiece ? isPossibleMove(square, board) as boolean : false
 							if (!piece) return <ChessSquare scaledSquareSize={boardScale.scaledSquareSize} possibleMove={possibleMove} key={index} />
 							const isKingChecked = piece.color === currentPlayer && piece.name === "king" && isCurrentChecked
-							const isCheckedSource = isCurrentChecked && (isKingChecked || isThreatingKing(square, board))
-							const isCheckedmateSource = isCurrentCheckedmate && (isKingChecked || isThreatingKing(square, board))
+							const isCheckedSource = isCurrentChecked && (isKingChecked || threateningSquares.some(v => areSameSquare(v, square)))
+							const isCheckedmateSource = isCurrentCheckedmate && (isKingChecked || threateningSquares.some(v => areSameSquare(v, square)))
 							const isClickable = piece.color === currentPlayer && isPieceCanMove(board, square)
 							return (
 								<ChessSquare
