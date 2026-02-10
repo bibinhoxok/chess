@@ -75,33 +75,31 @@ export const getPseudoLegalMoves = (targetPieceSquare: Square, board: Board) => 
 	return moves[piece.name](targetPieceSquare, piece, board)
 }
 
-export const getPossibleMoves = (targetPieceSquare: Square, board: Board) => {
-	return getPseudoLegalMoves(targetPieceSquare, board).filter(v => isValidMove(board, targetPieceSquare, v))
-}
+export const getPossibleMoves = (targetPieceSquare: Square, board: Board) => getPseudoLegalMoves(targetPieceSquare, board).filter(to => isValidMove(board, targetPieceSquare, to))
 
-export const createNewCurrentPieces = (board: Board, pieceMoves: PieceMove[], promotePiece?: Piece) =>
-	pieceMoves.reduce((currentBoard, move) => {
-		const newboard = { ...board, currentPieces: currentBoard }
-		const movingPiece = getPieceAt(move.from, newboard)
-		if (!movingPiece) return currentBoard
-		return currentBoard.map((row, rowIndex) => {
-			return row.map((piece, colIndex) => {
-				const landingMove = areSameSquare(move.to, { row: rowIndex, col: colIndex })
-				if (landingMove) {
-					if (promotePiece) return promotePiece
-					return movingPiece
-				}
-				if (areSameSquare(move.from, { row: rowIndex, col: colIndex })) return null
-				return piece
-			})
+export const createNewCurrentPieces = (board: Board, pieceMoves: PieceMove[], promotePiece?: Piece) => pieceMoves.reduce((currentBoard, move) => {
+	const newboard = { ...board, currentPieces: currentBoard }
+	const movingPiece = getPieceAt(move.from, newboard)
+	if (!movingPiece) return currentBoard
+	return currentBoard.map((row, rowIndex) => {
+		return row.map((piece, colIndex) => {
+			const landingMove = areSameSquare(move.to, { row: rowIndex, col: colIndex })
+			if (landingMove) {
+				if (promotePiece) return promotePiece
+				return movingPiece
+			}
+			if (areSameSquare(move.from, { row: rowIndex, col: colIndex })) return null
+			return piece
 		})
-	}, board.currentPieces)
+	})
+}, board.currentPieces)
 
 const regularMove = (board: Board, move: RegularMove): Board => ({
 	...board,
 	currentPieces: createNewCurrentPieces(board, [move]),
 	currentPlayer: board.currentPlayer === "white" ? "black" : "white",
 	gameHistory: [...board.gameHistory, move],
+	capturedPiece: move?.capturedPiece ? [...board.capturedPiece, move?.capturedPiece] : board.capturedPiece
 })
 
 const promotionMove = (board: Board, move: PromotionMove): Board => ({
@@ -109,6 +107,7 @@ const promotionMove = (board: Board, move: PromotionMove): Board => ({
 	currentPieces: createNewCurrentPieces(board, [move], move.promotionTo),
 	currentPlayer: board.currentPlayer === "white" ? "black" : "white",
 	gameHistory: [...board.gameHistory, move],
+	capturedPiece: move?.capturedPiece ? [...board.capturedPiece, move?.capturedPiece] : board.capturedPiece
 })
 const castlingMove = (board: Board, move: CastlingMove): Board => ({
 	...board,
@@ -126,6 +125,7 @@ const enPassantMove = (board: Board, move: EnPassantMove): Board => ({
 	]),
 	currentPlayer: board.currentPlayer === "white" ? "black" : "white",
 	gameHistory: [...board.gameHistory, move],
+	capturedPiece: [...board.capturedPiece, getPieceAt(move.capturedSquare, board)!]
 })
 
 export const movePiece = (board: Board, move: Move): Board => {

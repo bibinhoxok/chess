@@ -2,9 +2,10 @@
 import useChessboard from "@/lib/store/use-chess-board"
 import ChessPiece from "./chess-piece"
 import { Board, Square } from "@/lib/types/main"
-import { useRef } from "react"
+import { useMemo, useRef } from "react"
 import { handlePieceMove } from "@/lib/handlers/piece-moves"
 import { areSameSquare, isChecked, isCheckedMate, isPieceCanMove, isPossibleMove, isThreatingKing } from "@/lib/controls/board/conditions"
+import { getPossibleMoves } from "@/lib/controls/board/moves"
 import { AnimatePresence, motion } from "motion/react"
 import PromotionSelection from "./promotion-selection"
 import { Z_INDEX } from "@/lib/utils/z-index"
@@ -24,6 +25,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		gameStatus,
 		selectedSquare,
 		promotionSquare,
+		capturedPiece,
 	} = useChessboard()
 
 	const board: Board = {
@@ -34,21 +36,42 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		currentPlayer,
 		gameHistory,
 		gameStatus,
+		capturedPiece
 	}
 
 	const boardRef = useRef<HTMLDivElement>(null)
 
 	// Board scale
-	const boardScale = calculateBoardScale(scale)
+	const boardScale = useMemo(() => calculateBoardScale(scale), [scale])
 
-	const isCurrentChecked = isChecked(board)
-	const isCurrentCheckedmate = isCheckedMate(board)
+	const isCurrentChecked = useMemo(() => isChecked(board), [currentPieces, currentPlayer])
+	const isCurrentCheckedmate = useMemo(() => isCheckedMate(board), [currentPieces, currentPlayer, gameHistory])
 
-	const kingSquare = getSquareFromPieceType(board, ["king"], currentPlayer).at(0)
-	const threateningSquares = isCurrentChecked && kingSquare
-		? getThreatingPieces(board, kingSquare)
-		: []
+	const threateningSquares = useMemo(() => {
+		const kingSquare = getSquareFromPieceType(board, ["king"], currentPlayer).at(0)
+		return isCurrentChecked && kingSquare
+			? getThreatingPieces(board, kingSquare)
+			: []
+	}, [currentPieces, currentPlayer, isCurrentChecked])
 
+	const validMovesIndices = useMemo(() => {
+		if (!selectedPiece || !selectedSquare) return new Set<number>()
+		const moves = getPossibleMoves(selectedSquare, board)
+		return new Set(moves.map(m => m.row * 8 + m.col))
+	}, [selectedPiece, selectedSquare, currentPieces, currentPlayer])
+
+	const movablePieceIndices = useMemo(() => {
+		const indices = new Set<number>()
+		currentPieces.flat().forEach((piece, index) => {
+			if (piece && piece.color === currentPlayer) {
+				const square = { row: Math.floor(index / 8), col: index % 8 }
+				if (isPieceCanMove(board, square)) {
+					indices.add(index)
+				}
+			}
+		})
+		return indices
+	}, [currentPieces, currentPlayer])
 
 	const handleDrop = (
 		event: MouseEvent | TouchEvent | PointerEvent,
@@ -139,12 +162,12 @@ const Chessboard = ({ scale }: { scale: number }) => {
 					>
 						{currentPieces.flat().map((piece, index) => {
 							const square: Square = { row: Math.floor(index / 8), col: index % 8 }
-							const possibleMove = selectedPiece ? isPossibleMove(square, board) as boolean : false
+							const possibleMove = validMovesIndices.has(index)
 							if (!piece) return <ChessSquare scaledSquareSize={boardScale.scaledSquareSize} possibleMove={possibleMove} key={index} />
-							const isKingChecked = piece.color === currentPlayer && piece.name === "king" && isCurrentChecked
+							const isKingChecked = piece.name === "king" && piece.color === currentPlayer && isCurrentChecked
 							const isCheckedSource = isCurrentChecked && (isKingChecked || threateningSquares.some(v => areSameSquare(v, square)))
 							const isCheckedmateSource = isCurrentCheckedmate && (isKingChecked || threateningSquares.some(v => areSameSquare(v, square)))
-							const isClickable = piece.color === currentPlayer && isPieceCanMove(board, square)
+							const isClickable = piece.color === currentPlayer && movablePieceIndices.has(index)
 							return (
 								<ChessSquare
 									scaledSquareSize={boardScale.scaledSquareSize}

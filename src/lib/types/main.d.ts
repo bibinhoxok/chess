@@ -49,6 +49,7 @@ export type Board = {
 	currentPlayer: Color
 	gameHistory: Move[]
 	gameStatus: GameStatus
+	capturedPiece: Piece[]
 }
 
 export type Piece = {
@@ -56,3 +57,5 @@ export type Piece = {
 	readonly name: PieceName
 	readonly value: number
 }
+
+export type BoardHistory = Board[]

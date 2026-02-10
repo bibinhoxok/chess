@@ -52,4 +52,5 @@ export const chessBoard = (): Board => ({
 	currentPlayer: "white",
 	gameHistory: [],
 	gameStatus: "ongoing",
+	capturedPiece: []
 })
