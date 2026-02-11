@@ -1,7 +1,7 @@
 "use client"
 import useChessboard from "@/lib/store/use-chess-board"
-import ChessPiece from "./chess-piece"
-import { Board, Square } from "@/lib/types/main"
+import { ChessPiece, ChessPieceProps } from "./chess-piece"
+import { Board, Piece, Square } from "@/lib/types/main"
 import { useMemo, useRef } from "react"
 import { handlePieceMove } from "@/lib/handlers/piece-moves"
 import { areSameSquare, isChecked, isCheckedMate, isPieceCanMove, isPossibleMove, isThreatingKing } from "@/lib/controls/board/conditions"
@@ -13,6 +13,8 @@ import { calculateBoardScale } from "@/lib/utils/scaling"
 import { ASSETS } from "@/lib/utils/assets"
 import ChessSquare from "./chess-square"
 import { getPieceAt, getSquareFromPieceType, getThreatingPieces } from "@/lib/controls/board/utils"
+
+const pseudoPiece: Piece = { color: "white", name: "king", value: 0 }
 
 const Chessboard = ({ scale }: { scale: number }) => {
 	const {
@@ -73,6 +75,32 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		return indices
 	}, [currentPieces, currentPlayer])
 
+	const lastMoveIndices = useMemo(() => {
+		const lastMove = gameHistory.at(-1)
+		if (!lastMove) return new Set<number>()
+
+		const squares = lastMove.type === "castling"
+			? [lastMove.kingMove.from, lastMove.kingMove.to, lastMove.rookMove.from, lastMove.rookMove.to]
+			: [lastMove.from, lastMove.to]
+
+		return new Set(squares.map(s => s.row * 8 + s.col))
+	}, [gameHistory])
+
+	const handleMove = (targetSquare: Square) => {
+		const state = useChessboard.getState()
+		if (state.selectedPiece && state.selectedSquare && isPossibleMove(targetSquare, state)) {
+			handlePieceMove(
+				state,
+				state.selectedSquare,
+				targetSquare,
+				state.movePiece,
+				state.setPromotionSquare,
+			)
+			return true
+		}
+		return false
+	}
+
 	const handleDrop = (
 		event: MouseEvent | TouchEvent | PointerEvent,
 	) => {
@@ -102,36 +130,20 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		const row = Math.floor((y - boardScale.scaledBorderSize) / boardScale.scaledSquareSize)
 		const to = { row, col }
 
-		const state = useChessboard.getState()
-
-		if (state.selectedPiece && state.selectedSquare && isPossibleMove({ row, col }, state)) {
-			handlePieceMove(
-				state,
-				state.selectedSquare,
-				to,
-				state.movePiece,
-				state.setPromotionSquare,
-			)
-		}
+		handleMove(to)
 	}
 
 	const handleSquareClick = (square: Square) => {
-		const state = useChessboard.getState()
-		if (state.selectedPiece && state.selectedSquare && isPossibleMove(square, state)) {
-			handlePieceMove(
-				state,
-				state.selectedSquare,
-				square,
-				state.movePiece,
-				state.setPromotionSquare,
-			)
-			return
-		}
+		if (handleMove(square)) return
 
 		const piece = getPieceAt(square, board)
 		if (piece && piece.color === currentPlayer) {
 			selectPiece(square, piece)
 		}
+	}
+
+	const handleMoveClick = (square: Square) => {
+		handleMove(square)
 	}
 
 	return (
@@ -163,42 +175,39 @@ const Chessboard = ({ scale }: { scale: number }) => {
 						{currentPieces.flat().map((piece, index) => {
 							const square: Square = { row: Math.floor(index / 8), col: index % 8 }
 							const possibleMove = validMovesIndices.has(index)
-							if (!piece) return <ChessSquare scaledSquareSize={boardScale.scaledSquareSize} possibleMove={possibleMove} key={index} />
-							const isKingChecked = piece.name === "king" && piece.color === currentPlayer && isCurrentChecked
-							const isCheckedSource = isCurrentChecked && (isKingChecked || threateningSquares.some(v => areSameSquare(v, square)))
-							const isCheckedmateSource = isCurrentCheckedmate && (isKingChecked || threateningSquares.some(v => areSameSquare(v, square)))
-							const isClickable = piece.color === currentPlayer && movablePieceIndices.has(index)
+							const chessPieceProps: ChessPieceProps = {
+								rotate: currentPlayer === "white" ? 180 : 0,
+								piece: pseudoPiece,
+								scale,
+								onDrop: handleDrop,
+								onClick: () => handleSquareClick(square),
+							}
+
+							if (piece) {
+								chessPieceProps.piece = piece
+								chessPieceProps.isClickable = movablePieceIndices.has(index)
+								if (chessPieceProps.isClickable && selectedSquare) {
+									chessPieceProps.isSelected = areSameSquare(selectedSquare, square)
+								}
+								if (isCurrentChecked) {
+									const isKingChecked = piece.name === "king" && piece.color === currentPlayer
+									const isThreatening = threateningSquares.some(v => areSameSquare(v, square))
+									if (isKingChecked || isThreatening) {
+										chessPieceProps.isChecked = true
+										chessPieceProps.isCheckmate = isCurrentCheckedmate
+									}
+								}
+							}
+							const lasMoveFilter = lastMoveIndices.has(index) ? "bg-amber-500/50" : ""
 							return (
 								<ChessSquare
+									className={lasMoveFilter}
 									scaledSquareSize={boardScale.scaledSquareSize}
 									possibleMove={possibleMove}
 									key={index}
+									onClick={possibleMove ? () => handleMoveClick(square) : undefined}
 								>
-									<motion.div
-										onClick={() => handleSquareClick(square)}
-										animate={{ rotate: currentPlayer === "white" ? 180 : 0 }}
-										style={{
-											zIndex: areSameSquare(selectedSquare, square)
-												? Z_INDEX.selectedSquare
-												: Z_INDEX.default,
-										}}
-										transition={{ duration: 0.5 }}
-										key={index}
-										className="relative"
-									>
-										<ChessPiece
-											piece={piece}
-											currentSquare={square}
-											scale={scale}
-											isSelected={isPieceCanMove(board, square) && areSameSquare(selectedSquare, square)}
-											isCheckedSource={isCheckedSource}
-											isCheckedmateSource={isCheckedmateSource}
-											onDrop={handleDrop}
-											onClick={() => handleSquareClick(square)}
-											isClickable={isClickable}
-										/>
-
-									</motion.div>
+									{piece && <ChessPiece {...chessPieceProps} />}
 								</ChessSquare>
 							)
 						})}
