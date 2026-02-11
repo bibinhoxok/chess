@@ -2,7 +2,7 @@ import useChessboard from "@/lib/store/use-chess-board"
 import { PieceName } from "@/lib/types/main"
 import BorderedBox from "../gui/bordered-box"
 import { pieces } from "@/lib/controls/pieces"
-import ChessPiece from "./chess-piece"
+import { ChessPiece } from "./chess-piece"
 import { motion } from "motion/react"
 import { Z_INDEX } from "@/lib/utils/z-index"
 
@@ -30,11 +30,8 @@ const PromotionSelection = () => {
 							>
 								<ChessPiece
 									piece={pieces[pieceName](currentPlayer)}
-									currentSquare={{ row: 0, col: 0 }} // Dummy square
 									scale={4}
 									isSelected={false}
-									onDrop={() => { }}
-									onClick={() => { }}
 									isClickable={false}
 								/>
 							</motion.div>
