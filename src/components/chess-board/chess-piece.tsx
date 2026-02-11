@@ -1,98 +1,106 @@
-import { Piece, Square } from "@/lib/types/main"
+import { Piece } from "@/lib/types/main"
 import { motion } from "motion/react"
 import { Z_INDEX } from "@/lib/utils/z-index"
 import { offsetSpriteSheet } from "@/lib/utils/offsets"
 import { ASSETS } from "@/lib/utils/assets"
 
-type ChessPieceProps = {
+export type ChessPieceProps = {
 	piece: Piece
-	currentSquare: Square
 	scale: number
-	isSelected: boolean
-	onDrop: (
-		event: MouseEvent | TouchEvent | PointerEvent,
-	) => void
-	onClick: () => void
-	isCheckedSource?: boolean
-	isCheckedmateSource?: boolean
+	isSelected?: boolean
 	isClickable?: boolean
+	isChecked?: boolean
+	isCheckmate?: boolean
+	rotate?: number
+	onDrop?: (event: MouseEvent | TouchEvent | PointerEvent) => void
+	onClick?: () => void
 }
 
-const ChessPiece = ({
+export const ChessPiece = ({
 	piece,
 	scale,
-	isSelected,
-	isCheckedSource = false,
-	isCheckedmateSource = false,
+	isSelected = false,
+	isClickable = false,
+	isChecked = false,
+	isCheckmate = false,
+	rotate = 0,
 	onDrop,
 	onClick,
-	isClickable = true,
 }: ChessPieceProps) => {
 	const handleClick = () => {
-		if (isClickable) onClick()
+		if (isClickable && onClick) onClick()
 	}
 
 	return (
 		<motion.div
-			drag={isClickable}
-			dragMomentum={false}
-			onClick={handleClick}
-			onDragStart={handleClick}
-			onDragEnd={(event) => {
-				onDrop(
-					event as MouseEvent | TouchEvent | PointerEvent,
-				)
-			}}
-			initial={{ scale }}
-			transition={{ duration: 0.1 }}
-			dragSnapToOrigin
-			className="origin-center pixelated chess-sprite"
+			className="relative"
+			animate={{ rotate }}
+			transition={{ duration: 0.5 }}
 			style={{
-				zIndex: isSelected ? Z_INDEX.selectedPiece : Z_INDEX.piece,
-				...offsetSpriteSheet(
-					piece.name,
-					piece.color === "black"
-						? ASSETS.sprites.black
-						: ASSETS.sprites.white,
-				),
+				zIndex: isSelected ? Z_INDEX.selectedSquare : Z_INDEX.default,
 			}}
 		>
-			{isSelected && (
-				<div
-					className="origin-center absolute pixelated chess-sprite"
-					style={{
-						...offsetSpriteSheet(
-							piece.name,
-							ASSETS.sprites.highlight,
-						),
-					}}
-				/>
-			)}
-			{isCheckedSource && !isCheckedmateSource && (
-				<div
-					className="origin-center absolute pixelated chess-sprite"
-					style={{
-						...offsetSpriteSheet(
-							piece.name,
-							ASSETS.sprites.checked,
-						),
-					}}
-				/>
-			)}
-			{isCheckedmateSource && (
-				<div
-					className="origin-center absolute pixelated chess-sprite"
-					style={{
-						...offsetSpriteSheet(
-							piece.name,
-							ASSETS.sprites.mate,
-						),
-					}}
-				/>
-			)}
+			<motion.div
+				drag={isClickable}
+				dragMomentum={false}
+				dragSnapToOrigin
+				onClick={handleClick}
+				onDragStart={handleClick}
+				onDragEnd={(event) => {
+					if (onDrop) {
+						onDrop(
+							event as MouseEvent | TouchEvent | PointerEvent,
+						)
+					}
+				}}
+				initial={{ scale }}
+				animate={{ scale }}
+				transition={{ duration: 0.1 }}
+				className="origin-center pixelated chess-sprite"
+				style={{
+					zIndex: isSelected ? Z_INDEX.selectedPiece : Z_INDEX.piece,
+					...offsetSpriteSheet(
+						piece.name,
+						piece.color === "black"
+							? ASSETS.sprites.black
+							: ASSETS.sprites.white,
+					),
+				}}
+			>
+				{isSelected && (
+					<div
+						className="origin-center absolute pixelated chess-sprite"
+						style={{
+							...offsetSpriteSheet(
+								piece.name,
+								ASSETS.sprites.highlight,
+							),
+						}}
+					/>
+				)}
+				{isChecked && !isCheckmate && (
+					<div
+						className="origin-center absolute pixelated chess-sprite"
+						style={{
+							...offsetSpriteSheet(
+								piece.name,
+								ASSETS.sprites.checked,
+							),
+						}}
+					/>
+				)}
+				{isCheckmate && (
+					<div
+						className="origin-center absolute pixelated chess-sprite"
+						style={{
+							...offsetSpriteSheet(
+								piece.name,
+								ASSETS.sprites.mate,
+							),
+						}}
+					/>
+				)}
+			</motion.div>
 		</motion.div>
-
 	)
 }
-
-export default ChessPiece
