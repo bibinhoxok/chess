@@ -1,6 +1,10 @@
-import { useState } from "react"
+"use client"
+
+import { useState, useRef, useEffect } from "react"
 import { motion } from "motion/react"
+import { useDebounceValue, useWindowSize } from "usehooks-ts"
 import { cn } from "@/lib/utils/cn"
+import BorderedBox from "./bordered-box"
 
 interface Tab {
     id: string
@@ -14,36 +18,91 @@ interface TabsProps {
     className?: string
 }
 
-export const Tabs = ({ tabs, defaultTab, className }: TabsProps) => {
+export const Tabs = ({
+    tabs,
+    defaultTab,
+    className,
+}: TabsProps) => {
     const [activeTab, setActiveTab] = useState(defaultTab || tabs[0]?.id)
     const activeContent = tabs.find((t) => t.id === activeTab)?.content
 
+    const containerRef = useRef<HTMLDivElement>(null)
+    const [boxDims, setBoxDims] = useState({ width: 0, height: 0 })
+    const { width: windowWidth, height: windowHeight } = useWindowSize()
+    const [debouncedWindowWidth, setDebouncedWindowWidth] = useDebounceValue(windowWidth, 500)
+    const [debouncedWindowHeight, setDebouncedWindowHeight] = useDebounceValue(windowHeight, 500)
+
+
+    useEffect(() => {
+        if (!containerRef.current) return
+
+        const updateDimensions = () => {
+            const container = containerRef.current
+            if (!container) return
+
+            // Temporarily hide content to get true container dimensions
+            // This prevents the content from propping up the container height/width
+            const content = container.firstElementChild as HTMLElement
+            const originalDisplay = content ? content.style.display : ""
+            if (content) content.style.display = "none"
+
+
+            if (content) content.style.display = originalDisplay
+
+            const scale = 10
+
+            const w = Math.floor(((debouncedWindowWidth / 3) / scale - 17) / 4)
+            const headerBoxHeight = 21 * scale
+            const gap = 40
+            const remainingHeight = Math.max(0, debouncedWindowHeight - headerBoxHeight - gap)
+            const h = Math.floor((remainingHeight / scale - 17) / 4)
+
+            setBoxDims({
+                width: Math.max(1, w),
+                height: Math.max(1, h)
+            })
+        }
+
+        updateDimensions()
+
+    }, [debouncedWindowWidth, debouncedWindowHeight])
+
     return (
-        <div className={cn("flex flex-col h-full", className)}>
-            <div className="flex border-b border-gray-600">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={cn(
-                            "flex-1 py-2 px-4 text-sm font-medium transition-colors relative",
-                            activeTab === tab.id
-                                ? "text-white"
-                                : "text-gray-400 hover:text-gray-200"
-                        )}
-                    >
-                        {activeTab === tab.id && (
-                            <motion.div
-                                layoutId="active-tab"
-                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500"
-                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                            />
-                        )}
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
-            <div className="flex-1 overflow-auto p-4">{activeContent}</div>
+        <div ref={containerRef} className={cn("flex justify-center h-full w-full overflow-hidden", className)}>
+            {boxDims.width > 0 && (
+                <div className="flex flex-col h-full items-center">
+                    <BorderedBox width={boxDims.width} height={1}>
+                        <div className="flex border-b border-white/20">
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={cn(
+                                        "flex-1 py-3 px-2 text-[10px] font-medium transition-colors relative uppercase tracking-widest",
+                                        activeTab === tab.id
+                                            ? "text-white"
+                                            : "text-white/40 hover:text-white/80"
+                                    )}
+                                >
+                                    {activeTab === tab.id && (
+                                        <motion.div
+                                            layoutId="active-tab"
+                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                        />
+                                    )}
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+                    </BorderedBox>
+                    <BorderedBox width={boxDims.width} height={boxDims.height}>
+                        <div className="flex-1 overflow-auto p-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent w-full h-ful">
+                            {activeContent}
+                        </div>
+                    </BorderedBox>
+                </div>
+            )}
         </div>
     )
 }

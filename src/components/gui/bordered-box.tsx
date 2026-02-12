@@ -7,7 +7,7 @@ const BACKGROUND_COLOR = "#838b99"
 
 interface LetterProps {
 	char: string
-	scale?: number
+	scale?:number
 }
 
 const borderMap: {
@@ -58,15 +58,15 @@ const Letter: React.FC<LetterProps> = ({ char, scale = 10 }: LetterProps) => {
 const BorderedBox: React.FC<{
 	width: number
 	height: number
-	scale?: number
 	children: React.ReactNode
-}> = ({ width, height, scale = 10, children }) => {
+}> = ({ width, height, children }) => {
+	const scale = 10
 	const contentWidth = 4 * scale * width
 	const contentHeight = 4 * scale * height
 
 	return (
 		<div
-			className="flex items-center justify-center"
+			className="flex items-center justify-center select-none"
 			style={{
 				backgroundImage: `linear-gradient(to right, ${BACKGROUND_COLOR}, ${BACKGROUND_COLOR})`,
 				backgroundSize: `${contentWidth + 5 * scale}px ${contentHeight + 5 * scale}px`,

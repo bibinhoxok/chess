@@ -6,8 +6,11 @@ import PlayerInfo from "@/components/right-panel/player-info"
 import GameHistory from "@/components/right-panel/game-history"
 import Chat from "@/components/right-panel/chat"
 import Tools from "@/components/right-panel/tools"
+import { useIsClient } from "usehooks-ts"
 
 const RightWrapper = () => {
+	const isClient = useIsClient()
+
 	const tabs = [
 		{
 			id: "player",
@@ -32,8 +35,8 @@ const RightWrapper = () => {
 	]
 
 	return (
-		<div className="flex-1 p-4 bg-gray-900 border-l border-gray-700 text-white flex flex-col h-screen max-w-sm">
-			<Tabs tabs={tabs} defaultTab="history" className="h-full" />
+		<div className="p-4 text-white min-w-96">
+			{isClient && <Tabs tabs={tabs} defaultTab="history" />}
 		</div>
 	)
 }
