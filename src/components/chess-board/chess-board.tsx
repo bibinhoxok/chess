@@ -5,7 +5,7 @@ import { Board, Piece, Square } from "@/lib/types/main"
 import { useEffect, useMemo, useRef } from "react"
 import { handlePieceMove } from "@/lib/handlers/piece-moves"
 import { areSameSquare, checkGameStatus, isChecked, isCheckedMate, isPieceCanMove, isPossibleMove } from "@/lib/controls/board/conditions"
-import { getPossibleMoves } from "@/lib/controls/board/moves"
+import { getPossibleMoves, redoMove, undoMove } from "@/lib/controls/board/moves"
 import { AnimatePresence, motion } from "motion/react"
 import PromotionSelection from "./promotion-selection"
 import { calculateBoardScale } from "@/lib/utils/scaling"
@@ -26,7 +26,11 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		gameStatus,
 		selectedSquare,
 		promotionSquare,
-		capturedPiece,
+		capturedPieces,
+		currentHistoryIndex,
+		undo,
+		redo,
+		restart,
 	} = useChessboard()
 
 	const board: Board = {
@@ -37,12 +41,13 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		currentPlayer,
 		gameHistory,
 		gameStatus,
-		capturedPiece
+		capturedPieces,
+		currentHistoryIndex,
 	}
 
 	useEffect(() => {
-		console.log(checkGameStatus(board))
-	}, [board])
+		console.log(gameHistory.at(currentHistoryIndex)?.move)
+	}, [gameHistory])
 
 	const boardRef = useRef<HTMLDivElement>(null)
 	const boardScale = useMemo(() => calculateBoardScale(scale), [scale])
@@ -76,8 +81,9 @@ const Chessboard = ({ scale }: { scale: number }) => {
 	}, [currentPieces, currentPlayer])
 
 	const lastMoveIndices = useMemo(() => {
-		const lastMove = gameHistory.at(-1)
-		if (!lastMove) return new Set<number>()
+		const lastHistory = gameHistory.at(-1)
+		if (!lastHistory) return new Set<number>()
+		const lastMove = lastHistory.move
 		const squares = lastMove.type === "castling"
 			? [lastMove.kingMove.from, lastMove.kingMove.to, lastMove.rookMove.from, lastMove.rookMove.to]
 			: [lastMove.from, lastMove.to]
@@ -103,6 +109,22 @@ const Chessboard = ({ scale }: { scale: number }) => {
 			return true
 		}
 		return false
+	}
+
+	const handleUndo = () => {
+		if (!gameHistory.length) return
+		console.log("undo")
+		undo()
+	}
+
+	const handleRedo = () => {
+		console.log("redo")
+		redo()
+	}
+
+	const handleRestart = () => {
+		console.log("restart")
+		restart()
 	}
 
 	const handleDrop = (
@@ -220,6 +242,10 @@ const Chessboard = ({ scale }: { scale: number }) => {
 				{promotionSquare && <PromotionSelection />}
 			</div>
 			<p className="text-white text-2xl mt-4">{currentPlayer} move.</p>
+			<p className="text-white text-2xl mt-4">{gameStatus}</p>
+			<button onClick={handleUndo}>Undo</button>
+			<button onClick={handleRedo}>Redo</button>
+			<button onClick={handleRestart}>Restart</button>
 		</div>
 	)
 }

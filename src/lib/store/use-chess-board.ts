@@ -8,9 +8,9 @@ import {
 	PromotionMove,
 } from "@/lib/types/main"
 import { chessBoard } from "@/lib/controls/board/chess-board"
-import { getPossibleMoves, movePiece } from "../controls/board/moves"
+import { getPossibleMoves, movePiece, redoMove, undoMove } from "../controls/board/moves"
 import { pieces } from "../controls/pieces"
-import { isCheckedMate } from "../controls/board/conditions"
+import { isCheckedMate, checkGameStatus } from "../controls/board/conditions"
 
 type BoardState = Board & {
 	movePiece: (move: Move) => void
@@ -19,6 +19,9 @@ type BoardState = Board & {
 	promotionSquare: Square | null
 	setPromotionSquare: (square: Square | null) => void
 	handlePromotion: (promotionTo: PieceName) => void
+	undo: () => void
+	restart: () => void
+	redo: () => void
 }
 
 const useChessboard = create<BoardState>((set, get) => ({
@@ -26,11 +29,16 @@ const useChessboard = create<BoardState>((set, get) => ({
 	promotionSquare: null,
 	setBoard: (board: Board) => set(board),
 	movePiece: (move) =>
-		set((state) => ({
-			...movePiece(state, move),
-			selectedPiece: null,
-			selectedSquare: null,
-		})),
+		set((state) => {
+			const nextBoard = movePiece(state, move)
+			const gameStatus = checkGameStatus(nextBoard)
+			return {
+				...nextBoard,
+				gameStatus,
+				selectedPiece: null,
+				selectedSquare: null,
+			}
+		}),
 	selectPiece: (from, piece) =>
 		set((state) => {
 			const deselected = {
@@ -63,13 +71,45 @@ const useChessboard = create<BoardState>((set, get) => ({
 			promotionTo: pieces[promotionTo](piece.color),
 			capturedPiece: state.currentPieces[to.row][to.col] || undefined,
 		}
-		set((state) => ({
-			...movePiece(state, promotionMove),
-			selectedPiece: null,
-			selectedSquare: null,
-			promotionSquare: null,
-		}))
+		set((state) => {
+			const nextBoard = movePiece(state, promotionMove)
+			const gameStatus = checkGameStatus(nextBoard)
+			return {
+				...nextBoard,
+				gameStatus,
+				selectedPiece: null,
+				selectedSquare: null,
+				promotionSquare: null,
+			}
+		})
 	},
+	undo: () =>
+		set((state) => {
+			const nextBoard = undoMove(state)
+			const gameStatus = checkGameStatus(nextBoard)
+			return {
+				...nextBoard,
+				gameStatus,
+				selectedPiece: null,
+				selectedSquare: null,
+				promotionSquare: null,
+				possibleMoves: [],
+			}
+		}),
+	restart: () => set(chessBoard()),
+	redo: () =>
+		set((state) => {
+			const nextBoard = redoMove(state)
+			const gameStatus = checkGameStatus(nextBoard)
+			return {
+				...nextBoard,
+				gameStatus,
+				selectedPiece: null,
+				selectedSquare: null,
+				promotionSquare: null,
+				possibleMoves: [],
+			}
+		}),
 }))
 
 export default useChessboard

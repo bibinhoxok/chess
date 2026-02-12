@@ -12,12 +12,14 @@ import {
 } from "@/lib/types/main"
 import { areSameSquare, isSquareOnBoard, isValidMove } from "./conditions"
 import { getPieceAt } from "./utils";
+import { chessBoard } from "./chess-board";
 import { getPossiblePawnMoves } from "../pieces/pawn";
 import { getPossibleRookMoves } from "../pieces/rook";
 import { getPossibleKnightMoves } from "../pieces/knight";
 import { getPossibleBishopMoves } from "../pieces/bishop";
 import { getPossibleKingMoves } from "../pieces/king";
 import { getPossibleQueenMoves } from "../pieces/queen";
+import { pieces } from "../pieces";
 
 
 export const getStraightMovesInDirection = (
@@ -97,23 +99,17 @@ export const createNewCurrentPieces = (board: Board, pieceMoves: PieceMove[], pr
 const regularMove = (board: Board, move: RegularMove): Board => ({
 	...board,
 	currentPieces: createNewCurrentPieces(board, [move]),
-	currentPlayer: board.currentPlayer === "white" ? "black" : "white",
-	gameHistory: [...board.gameHistory, move],
-	capturedPiece: move?.capturedPiece ? [...board.capturedPiece, move?.capturedPiece] : board.capturedPiece
+	capturedPieces: move?.capturedPiece ? [...board.capturedPieces, move?.capturedPiece] : board.capturedPieces
 })
 
 const promotionMove = (board: Board, move: PromotionMove): Board => ({
 	...board,
 	currentPieces: createNewCurrentPieces(board, [move], move.promotionTo),
-	currentPlayer: board.currentPlayer === "white" ? "black" : "white",
-	gameHistory: [...board.gameHistory, move],
-	capturedPiece: move?.capturedPiece ? [...board.capturedPiece, move?.capturedPiece] : board.capturedPiece
+	capturedPieces: move?.capturedPiece ? [...board.capturedPieces, move?.capturedPiece] : board.capturedPieces
 })
 const castlingMove = (board: Board, move: CastlingMove): Board => ({
 	...board,
 	currentPieces: createNewCurrentPieces(board, [move.kingMove, move.rookMove]),
-	currentPlayer: board.currentPlayer === "white" ? "black" : "white",
-	gameHistory: [...board.gameHistory, move],
 })
 
 const enPassantMove = (board: Board, move: EnPassantMove): Board => ({
@@ -123,9 +119,7 @@ const enPassantMove = (board: Board, move: EnPassantMove): Board => ({
 		{ from: move.from, to: move.capturedSquare } as PieceMove,
 		{ from: move.capturedSquare, to: move.to } as PieceMove,
 	]),
-	currentPlayer: board.currentPlayer === "white" ? "black" : "white",
-	gameHistory: [...board.gameHistory, move],
-	capturedPiece: [...board.capturedPiece, getPieceAt(move.capturedSquare, board)!]
+	capturedPieces: [...board.capturedPieces, getPieceAt(move.capturedSquare, board)!]
 })
 
 export const movePiece = (board: Board, move: Move): Board => {
@@ -135,10 +129,48 @@ export const movePiece = (board: Board, move: Move): Board => {
 		castling: () => castlingMove(board, move as CastlingMove),
 		enPassant: () => enPassantMove(board, move as EnPassantMove),
 	}
-	return moves[move.type]()
+	const nextBoardState = moves[move.type]()
+	const newHistory = board.gameHistory.slice(0, board.currentHistoryIndex + 1)
+	newHistory.push({ move, board: nextBoardState })
+
+	return {
+		...nextBoardState,
+		currentPlayer: board.currentPlayer === "white" ? "black" : "white",
+		gameHistory: newHistory,
+		currentHistoryIndex: newHistory.length - 1
+	}
 }
 
-// Under construction
+
+
 export const undoMove = (board: Board): Board => {
-	return board
+	const newIndex = board.currentHistoryIndex - 1
+	if (newIndex < -1) return board
+
+	if (newIndex === -1) {
+		return {
+			...chessBoard(),
+			gameHistory: board.gameHistory,
+			currentHistoryIndex: -1
+		}
+	}
+
+	const previousEntry = board.gameHistory[newIndex]
+	return {
+		...previousEntry.board,
+		gameHistory: board.gameHistory,
+		currentHistoryIndex: newIndex
+	}
+}
+
+export const redoMove = (board: Board): Board => {
+	const newIndex = board.currentHistoryIndex + 1
+	if (newIndex >= board.gameHistory.length) return board
+
+	const nextEntry = board.gameHistory[newIndex]
+	return {
+		...nextEntry.board,
+		gameHistory: board.gameHistory,
+		currentHistoryIndex: newIndex
+	}
 }

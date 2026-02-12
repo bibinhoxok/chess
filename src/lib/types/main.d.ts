@@ -47,9 +47,10 @@ export type Board = {
 	possibleMoves: Square[]
 	currentPieces: (Piece | null)[][]
 	currentPlayer: Color
-	gameHistory: Move[]
+	gameHistory: { move: Move; board: Board }[]
 	gameStatus: GameStatus
-	capturedPiece: Piece[]
+	capturedPieces: Piece[]
+	currentHistoryIndex: number
 }
 
 export type Piece = {
