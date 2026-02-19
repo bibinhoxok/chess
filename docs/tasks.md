@@ -48,3 +48,11 @@
     - [ ] **Commentary UI**
         - [ ] Create Scrollable Commentary Box
         - [ ] Style with "Guide" Persona <!-- id: 9b -->
+
+- [ ] **Game Data & Utilities**
+    - [ ] **Notation Support**
+        - [ ] Implement Algebraic Notation Parser/Generator
+        - [ ] Implement FEN (Forsyth-Edwards Notation) Parser/Generator
+    - [ ] **Import/Export**
+        - [ ] PGN Import/Export
+        - [ ] FEN Import/Export
