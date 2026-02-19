@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useMemo } from "react"
 import { motion } from "motion/react"
 import { useDebounceValue, useWindowSize } from "usehooks-ts"
 import { cn } from "@/lib/utils/cn"
@@ -18,31 +18,15 @@ interface TabsProps {
 	className?: string
 }
 
-export const Tabs = ({ tabs, defaultTab, className }: TabsProps) => {
-	const [activeTab, setActiveTab] = useState(defaultTab || tabs[0]?.id)
-	const activeContent = tabs.find((t) => t.id === activeTab)?.content
-	const containerRef = useRef<HTMLDivElement>(null)
-	const [boxDims, setBoxDims] = useState({ width: 0, height: 0 })
+const useTabSize = () => {
 	const { width: windowWidth = 0, height: windowHeight = 0 } = useWindowSize()
 
-	const [debouncedSize, setDebouncedSize] = useDebounceValue(
+	const [debouncedSize] = useDebounceValue(
 		{ width: windowWidth, height: windowHeight },
 		50,
 	)
 
-	useEffect(() => {
-		setDebouncedSize({ width: windowWidth, height: windowHeight })
-	}, [windowWidth, windowHeight, setDebouncedSize])
-
-	useEffect(() => {
-		const container = containerRef.current
-		if (!container) return
-		// Temporarily hide content to get true container dimensions
-		// This prevents the content from propping up the container height/width
-		const content = container.firstElementChild as HTMLElement
-		const originalDisplay = content ? content.style.display : ""
-		if (content) content.style.display = "none"
-		if (content) content.style.display = originalDisplay
+	return useMemo(() => {
 		const scale = 10
 		const w = Math.floor((debouncedSize.width / 3 / scale - 17) / 4)
 		const headerBoxHeight = 21 * scale
@@ -52,15 +36,20 @@ export const Tabs = ({ tabs, defaultTab, className }: TabsProps) => {
 			debouncedSize.height - headerBoxHeight - gap,
 		)
 		const h = Math.floor((remainingHeight / scale - 17) / 4)
-		setBoxDims({
+		return {
 			width: Math.max(3, w),
 			height: Math.max(1, h),
-		})
+		}
 	}, [debouncedSize])
+}
 
+
+export const Tabs = ({ tabs, defaultTab, className }: TabsProps) => {
+	const [activeTab, setActiveTab] = useState(defaultTab || tabs[0]?.id)
+	const activeContent = tabs.find((t) => t.id === activeTab)?.content
+	const boxDims = useTabSize()
 	return (
 		<div
-			ref={containerRef}
 			className={cn(
 				"flex justify-center h-full w-full overflow-hidden",
 				className,
