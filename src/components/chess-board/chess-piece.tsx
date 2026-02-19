@@ -48,9 +48,7 @@ export const ChessPiece = ({
 				onDragStart={handleClick}
 				onDragEnd={(event) => {
 					if (onDrop) {
-						onDrop(
-							event as MouseEvent | TouchEvent | PointerEvent,
-						)
+						onDrop(event as MouseEvent | TouchEvent | PointerEvent)
 					}
 				}}
 				initial={{ scale }}

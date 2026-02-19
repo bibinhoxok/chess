@@ -9,7 +9,8 @@ import { Z_INDEX } from "@/lib/utils/z-index"
 const promotionPieces: PieceName[] = ["queen", "rook", "bishop", "knight"]
 
 const PromotionSelection = () => {
-	const { handlePromotion, currentPlayer, setPromotionSquare } = useChessboard()
+	const { handlePromotion, currentPlayer, setPromotionSquare } =
+		useChessboard()
 
 	return (
 		<div

@@ -7,7 +7,7 @@ const BACKGROUND_COLOR = "#838b99"
 
 interface LetterProps {
 	char: string
-	scale?:number
+	scale?: number
 }
 
 const borderMap: {
