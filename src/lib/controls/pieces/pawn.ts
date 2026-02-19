@@ -3,7 +3,11 @@ import { getPieceAt } from "../board/utils"
 import { isSquareOnBoard } from "../board/conditions"
 import { isEnPassant, isPromotion } from "../board/special-move-conditions"
 
-export const getPawnForwardMoves = (color: Color, from: Square, board: Board): Square[] => {
+export const getPawnForwardMoves = (
+	color: Color,
+	from: Square,
+	board: Board,
+): Square[] => {
 	const oneSquareForward = color === "white" ? 1 : -1
 	const startRow = color === "white" ? 1 : 6
 	const twoSquaresForward = color === "white" ? 2 : -2
@@ -11,12 +15,15 @@ export const getPawnForwardMoves = (color: Color, from: Square, board: Board): S
 	const directions =
 		startRow === from.row
 			? [
-				{ col: 0, row: oneSquareForward },
-				{ col: 0, row: twoSquaresForward },
-			]
+					{ col: 0, row: oneSquareForward },
+					{ col: 0, row: twoSquaresForward },
+				]
 			: [{ col: 0, row: oneSquareForward }]
 	const getMove = (direction: { col: number; row: number }) => {
-		const to = { col: from.col + direction.col, row: from.row + direction.row }
+		const to = {
+			col: from.col + direction.col,
+			row: from.row + direction.row,
+		}
 		if (!isSquareOnBoard(to)) return []
 		if (
 			direction.row === twoSquaresForward &&
@@ -27,15 +34,25 @@ export const getPawnForwardMoves = (color: Color, from: Square, board: Board): S
 		if (pieceAtTarget === null) return [to]
 		return []
 	}
-	return directions.flatMap(direction => getMove(direction))
+	return directions.flatMap((direction) => getMove(direction))
 }
 
-export const getPawnCaptureMoves = (color: Color, from: Square, board: Board): Square[] => {
+export const getPawnCaptureMoves = (
+	color: Color,
+	from: Square,
+	board: Board,
+): Square[] => {
 	const forward = color === "white" ? 1 : -1
 	const captureDirections = [-1, 1]
-	const directions = captureDirections.map(direction => ({ col: direction, row: forward }))
-	return directions.flatMap(direction => {
-		const to = { col: from.col + direction.col, row: from.row + direction.row }
+	const directions = captureDirections.map((direction) => ({
+		col: direction,
+		row: forward,
+	}))
+	return directions.flatMap((direction) => {
+		const to = {
+			col: from.col + direction.col,
+			row: from.row + direction.row,
+		}
 		if (!isSquareOnBoard(to)) return []
 		const pieceAtTarget = getPieceAt(to, board)
 		if (pieceAtTarget === null) return []
@@ -44,7 +61,11 @@ export const getPawnCaptureMoves = (color: Color, from: Square, board: Board): S
 	})
 }
 
-export const getPawnPromoteMoves = (color: Color, from: Square, board: Board): Square[] => {
+export const getPawnPromoteMoves = (
+	color: Color,
+	from: Square,
+	board: Board,
+): Square[] => {
 	const captureMoves = getPawnCaptureMoves(color, from, board)
 	const forwardMoves = getPawnForwardMoves(color, from, board)
 	return isPromotion(getPieceAt(from, board) as Piece, from)
@@ -52,12 +73,22 @@ export const getPawnPromoteMoves = (color: Color, from: Square, board: Board): S
 		: []
 }
 
-export const getEnPassantMove = (color: Color, from: Square, board: Board): Square[] => {
+export const getEnPassantMove = (
+	color: Color,
+	from: Square,
+	board: Board,
+): Square[] => {
 	const forward = color === "white" ? 1 : -1
 	const captureDirections = [-1, 1]
-	const directions = captureDirections.map(direction => ({ col: direction, row: forward }))
-	return directions.flatMap(direction => {
-		const to = { col: from.col + direction.col, row: from.row + direction.row }
+	const directions = captureDirections.map((direction) => ({
+		col: direction,
+		row: forward,
+	}))
+	return directions.flatMap((direction) => {
+		const to = {
+			col: from.col + direction.col,
+			row: from.row + direction.row,
+		}
 		if (!isSquareOnBoard(to)) return []
 		if (
 			isEnPassant(board, getPieceAt(from, board) as Piece, from, {
@@ -70,7 +101,11 @@ export const getEnPassantMove = (color: Color, from: Square, board: Board): Squa
 	})
 }
 
-export const getPossiblePawnMoves = (from: Square, piece: Piece, board: Board): Square[] => {
+export const getPossiblePawnMoves = (
+	from: Square,
+	piece: Piece,
+	board: Board,
+): Square[] => {
 	const { color } = piece
 	return [
 		...getPawnForwardMoves(color, from, board),

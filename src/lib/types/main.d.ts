@@ -12,6 +12,8 @@ export type PieceMove = {
 	to: Square
 }
 
+export type MoveType = "regular" | "promotion" | "castling" | "enPassant"
+
 export type RegularMove = PieceMove & {
 	type: "regular"
 	capturedPiece?: Piece
@@ -41,13 +43,17 @@ export type GameStatus =
 	| "insufficient material"
 	| "ongoing"
 
+export type History = {
+	move: Move
+	board: Board
+}
 export type Board = {
 	selectedPiece: Piece | null
 	selectedSquare: Square | null
 	possibleMoves: Square[]
 	currentPieces: (Piece | null)[][]
 	currentPlayer: Color
-	gameHistory: { move: Move; board: Board }[]
+	gameHistory: History[]
 	gameStatus: GameStatus
 	capturedPieces: Piece[]
 	currentHistoryIndex: number

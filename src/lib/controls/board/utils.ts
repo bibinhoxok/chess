@@ -7,10 +7,14 @@ export const getPieceAt = (square: Square, board: Board): Piece | null => {
 	return board.currentPieces[square.row][square.col]
 }
 
-export const getSquareFromPieceType = (board: Board, pieceNames?: PieceName[], color?: Color) => {
+export const getSquareFromPieceType = (
+	board: Board,
+	pieceNames?: PieceName[],
+	color?: Color,
+) => {
 	const pieceNameFilter = (name: PieceName) => {
 		if (!pieceNames) return true
-		return pieceNames.some(v => v === name)
+		return pieceNames.some((v) => v === name)
 	}
 	const colorFilter = (pieceColor: Color) => {
 		if (!color) return true
@@ -19,7 +23,11 @@ export const getSquareFromPieceType = (board: Board, pieceNames?: PieceName[], c
 	return board.currentPieces
 		.map((row, rowIndex) => {
 			return row.map((piece, colIndex) => {
-				if (piece && pieceNameFilter(piece.name) && colorFilter(piece.color)) {
+				if (
+					piece &&
+					pieceNameFilter(piece.name) &&
+					colorFilter(piece.color)
+				) {
 					return { row: rowIndex, col: colIndex } as Square
 				}
 				return undefined
@@ -33,9 +41,7 @@ export const simulateMove = (board: Board, from: Square, to: Square): Board => {
 	const pieceToMove = board.currentPieces[from.row][from.col]
 	if (!pieceToMove) return board
 
-	const newPieces = createNewCurrentPieces(board, [
-		{ from, to },
-	])
+	const newPieces = createNewCurrentPieces(board, [{ from, to }])
 
 	return { ...board, currentPieces: newPieces }
 }
@@ -46,10 +52,20 @@ export const getThreatingPieces = (board: Board, tagetPieceSquare: Square) => {
 	return board.currentPieces
 		.map((row, rowIndex) => {
 			return row.map((piece, colIndex) => {
-				const isOpponentPiece = piece && piece.color !== tagetPiece.color
+				const isOpponentPiece =
+					piece && piece.color !== tagetPiece.color
 				if (isOpponentPiece) {
-					const opponentPiecePossibleMoves = getPossibleMoves({ row: rowIndex, col: colIndex }, board)
-					if (opponentPiecePossibleMoves.some(v => tagetPieceSquare.row === v.row && tagetPieceSquare.col === v.col)) {
+					const opponentPiecePossibleMoves = getPossibleMoves(
+						{ row: rowIndex, col: colIndex },
+						board,
+					)
+					if (
+						opponentPiecePossibleMoves.some(
+							(v) =>
+								tagetPieceSquare.row === v.row &&
+								tagetPieceSquare.col === v.col,
+						)
+					) {
 						return { row: rowIndex, col: colIndex } as Square
 					}
 				}

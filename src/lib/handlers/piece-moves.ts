@@ -1,3 +1,8 @@
+import {
+	createCastlingMove,
+	createEnPassantMove,
+	createRegularMove,
+} from "@/lib/controls/board/moves"
 import { getMoveType } from "../controls/board/special-move-conditions"
 import {
 	Board,
@@ -25,13 +30,16 @@ export const handlePieceMove = (
 		const rookCol = to.col > from.col ? 7 : 0
 		const rookToCol = to.col > from.col ? 5 : 3
 		const rookSquare = { row: from.row, col: rookCol }
-		const rookMove: PieceMove = { from: rookSquare, to: { row: from.row, col: rookToCol } }
-		const castlingMove: CastlingMove = { type: "castling", kingMove, rookMove }
+		const rookMove: PieceMove = {
+			from: rookSquare,
+			to: { row: from.row, col: rookToCol },
+		}
+		const castlingMove = createCastlingMove(kingMove, rookMove)
 		movePiece(castlingMove)
 	}
 	const handleEnPassantMove = () => {
 		const capturedSquare: Square = { row: from.row, col: to.col }
-		const enPassantMove: EnPassantMove = { type: "enPassant", from, to,  capturedSquare }
+		const enPassantMove = createEnPassantMove(from, to, capturedSquare)
 		movePiece(enPassantMove)
 	}
 
@@ -40,7 +48,11 @@ export const handlePieceMove = (
 	}
 
 	const handleRegularMove = () => {
-		const regularMove: RegularMove = { type: "regular", from, to, capturedPiece: board.currentPieces[to.row][to.col] || undefined }
+		const regularMove = createRegularMove(
+			from,
+			to,
+			board.currentPieces[to.row][to.col] || undefined,
+		)
 		movePiece(regularMove)
 	}
 

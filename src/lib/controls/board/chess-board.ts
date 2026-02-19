@@ -16,8 +16,8 @@ const initialPieces = (): (Piece | null)[][] => {
 		rook("white"),
 		knight("white"),
 		bishop("white"),
-		queen("white"),
 		king("white"),
+		queen("white"),
 		bishop("white"),
 		knight("white"),
 		rook("white"),
@@ -31,8 +31,8 @@ const initialPieces = (): (Piece | null)[][] => {
 		rook("black"),
 		knight("black"),
 		bishop("black"),
-		queen("black"),
 		king("black"),
+		queen("black"),
 		bishop("black"),
 		knight("black"),
 		rook("black"),
@@ -53,5 +53,5 @@ export const chessBoard = (): Board => ({
 	gameHistory: [],
 	gameStatus: "ongoing",
 	capturedPieces: [],
-	currentHistoryIndex: -1
+	currentHistoryIndex: -1,
 })

@@ -9,18 +9,19 @@ import {
 	PieceMove,
 	CastlingMove,
 	EnPassantMove,
+	PieceName,
 } from "@/lib/types/main"
 import { areSameSquare, isSquareOnBoard, isValidMove } from "./conditions"
-import { getPieceAt } from "./utils";
-import { chessBoard } from "./chess-board";
-import { getPossiblePawnMoves } from "../pieces/pawn";
-import { getPossibleRookMoves } from "../pieces/rook";
-import { getPossibleKnightMoves } from "../pieces/knight";
-import { getPossibleBishopMoves } from "../pieces/bishop";
-import { getPossibleKingMoves } from "../pieces/king";
-import { getPossibleQueenMoves } from "../pieces/queen";
-import { pieces } from "../pieces";
-
+import { getPieceAt, getSquareFromPieceType } from "./utils"
+import { chessBoard } from "./chess-board"
+import { getPossiblePawnMoves } from "../pieces/pawn"
+import { getPossibleRookMoves } from "../pieces/rook"
+import { getPossibleKnightMoves } from "../pieces/knight"
+import { getPossibleBishopMoves } from "../pieces/bishop"
+import { getPossibleKingMoves } from "../pieces/king"
+import { getPossibleQueenMoves } from "../pieces/queen"
+import { pieces } from "../pieces"
+import { fileDic } from "@/lib/utils/dictionaries"
 
 export const getStraightMovesInDirection = (
 	from: Square,
@@ -29,14 +30,24 @@ export const getStraightMovesInDirection = (
 	color: Color,
 ): Square[] => {
 	// Generate all squares in a given direction
-	const squaresInDirection = Array.from({ length: 7 }, (_, i) => ({ col: from.col + direction.col * (i + 1), row: from.row + direction.row * (i + 1), }))
+	const squaresInDirection = Array.from({ length: 7 }, (_, i) => ({
+		col: from.col + direction.col * (i + 1),
+		row: from.row + direction.row * (i + 1),
+	}))
 
 	// Take squares until we go off the board
-	const firstOffBoardIndex = squaresInDirection.findIndex(sq => !isSquareOnBoard(sq))
-	const onBoardSquares = firstOffBoardIndex === -1 ? squaresInDirection : squaresInDirection.slice(0, firstOffBoardIndex)
+	const firstOffBoardIndex = squaresInDirection.findIndex(
+		(sq) => !isSquareOnBoard(sq),
+	)
+	const onBoardSquares =
+		firstOffBoardIndex === -1
+			? squaresInDirection
+			: squaresInDirection.slice(0, firstOffBoardIndex)
 
 	// Find the first piece in the path
-	const firstPieceIndex = onBoardSquares.findIndex(square => getPieceAt(square, board))
+	const firstPieceIndex = onBoardSquares.findIndex((square) =>
+		getPieceAt(square, board),
+	)
 
 	// If no piece is found, all squares on the board in this direction are valid
 	if (firstPieceIndex === -1) return onBoardSquares
@@ -44,7 +55,10 @@ export const getStraightMovesInDirection = (
 	// Include the square with the piece if it's an opponent's piece
 	const blockingPiece = getPieceAt(onBoardSquares[firstPieceIndex], board)
 	const isOpponentsPiece = blockingPiece && blockingPiece.color !== color
-	const moves = onBoardSquares.slice(0, isOpponentsPiece ? firstPieceIndex + 1 : firstPieceIndex)
+	const moves = onBoardSquares.slice(
+		0,
+		isOpponentsPiece ? firstPieceIndex + 1 : firstPieceIndex,
+	)
 	return moves
 }
 
@@ -62,8 +76,10 @@ export const getSingleMoveInDirection = (
 	return []
 }
 
-
-export const getPseudoLegalMoves = (targetPieceSquare: Square, board: Board) => {
+export const getPseudoLegalMoves = (
+	targetPieceSquare: Square,
+	board: Board,
+) => {
 	const piece = getPieceAt(targetPieceSquare, board)
 	if (!piece) return []
 	const moves = {
@@ -77,39 +93,109 @@ export const getPseudoLegalMoves = (targetPieceSquare: Square, board: Board) => 
 	return moves[piece.name](targetPieceSquare, piece, board)
 }
 
-export const getPossibleMoves = (targetPieceSquare: Square, board: Board) => getPseudoLegalMoves(targetPieceSquare, board).filter(to => isValidMove(board, targetPieceSquare, to))
+export const getPossibleMoves = (targetPieceSquare: Square, board: Board) =>
+	getPseudoLegalMoves(targetPieceSquare, board).filter((to) =>
+		isValidMove(board, targetPieceSquare, to),
+	)
 
-export const createNewCurrentPieces = (board: Board, pieceMoves: PieceMove[], promotePiece?: Piece) => pieceMoves.reduce((currentBoard, move) => {
-	const newboard = { ...board, currentPieces: currentBoard }
-	const movingPiece = getPieceAt(move.from, newboard)
-	if (!movingPiece) return currentBoard
-	return currentBoard.map((row, rowIndex) => {
-		return row.map((piece, colIndex) => {
-			const landingMove = areSameSquare(move.to, { row: rowIndex, col: colIndex })
-			if (landingMove) {
-				if (promotePiece) return promotePiece
-				return movingPiece
-			}
-			if (areSameSquare(move.from, { row: rowIndex, col: colIndex })) return null
-			return piece
+export const createNewCurrentPieces = (
+	board: Board,
+	pieceMoves: PieceMove[],
+	promotePiece?: Piece,
+) =>
+	pieceMoves.reduce((currentBoard, move) => {
+		const newboard = { ...board, currentPieces: currentBoard }
+		const movingPiece = getPieceAt(move.from, newboard)
+		if (!movingPiece) return currentBoard
+		return currentBoard.map((row, rowIndex) => {
+			return row.map((piece, colIndex) => {
+				const landingMove = areSameSquare(move.to, {
+					row: rowIndex,
+					col: colIndex,
+				})
+				if (landingMove) {
+					if (promotePiece) return promotePiece
+					return movingPiece
+				}
+				if (areSameSquare(move.from, { row: rowIndex, col: colIndex }))
+					return null
+				return piece
+			})
 		})
-	})
-}, board.currentPieces)
+	}, board.currentPieces)
+export const createCastlingMove = (
+	kingMove: PieceMove,
+	rookMove: PieceMove,
+): CastlingMove => {
+	return {
+		type: "castling",
+		kingMove,
+		rookMove,
+	}
+}
+
+export const createPromotionMove = (
+	from: Square,
+	to: Square,
+	promotionPiece: Piece,
+	capturedPiece?: Piece,
+): PromotionMove => {
+	return {
+		type: "promotion",
+		from,
+		to,
+		promotionTo: promotionPiece,
+		capturedPiece,
+	}
+}
+
+export const createEnPassantMove = (
+	from: Square,
+	to: Square,
+	capturedSquare: Square,
+): EnPassantMove => {
+	return {
+		type: "enPassant",
+		from,
+		to,
+		capturedSquare,
+	}
+}
+
+export const createRegularMove = (
+	from: Square,
+	to: Square,
+	capturedPiece?: Piece,
+): RegularMove => {
+	return {
+		type: "regular",
+		from,
+		to,
+		capturedPiece,
+	}
+}
 
 const regularMove = (board: Board, move: RegularMove): Board => ({
 	...board,
 	currentPieces: createNewCurrentPieces(board, [move]),
-	capturedPieces: move?.capturedPiece ? [...board.capturedPieces, move?.capturedPiece] : board.capturedPieces
+	capturedPieces: move?.capturedPiece
+		? [...board.capturedPieces, move?.capturedPiece]
+		: board.capturedPieces,
 })
 
 const promotionMove = (board: Board, move: PromotionMove): Board => ({
 	...board,
 	currentPieces: createNewCurrentPieces(board, [move], move.promotionTo),
-	capturedPieces: move?.capturedPiece ? [...board.capturedPieces, move?.capturedPiece] : board.capturedPieces
+	capturedPieces: move?.capturedPiece
+		? [...board.capturedPieces, move?.capturedPiece]
+		: board.capturedPieces,
 })
 const castlingMove = (board: Board, move: CastlingMove): Board => ({
 	...board,
-	currentPieces: createNewCurrentPieces(board, [move.kingMove, move.rookMove]),
+	currentPieces: createNewCurrentPieces(board, [
+		move.kingMove,
+		move.rookMove,
+	]),
 })
 
 const enPassantMove = (board: Board, move: EnPassantMove): Board => ({
@@ -119,7 +205,10 @@ const enPassantMove = (board: Board, move: EnPassantMove): Board => ({
 		{ from: move.from, to: move.capturedSquare } as PieceMove,
 		{ from: move.capturedSquare, to: move.to } as PieceMove,
 	]),
-	capturedPieces: [...board.capturedPieces, getPieceAt(move.capturedSquare, board)!]
+	capturedPieces: [
+		...board.capturedPieces,
+		getPieceAt(move.capturedSquare, board)!,
+	],
 })
 
 export const movePiece = (board: Board, move: Move): Board => {
@@ -137,11 +226,39 @@ export const movePiece = (board: Board, move: Move): Board => {
 		...nextBoardState,
 		currentPlayer: board.currentPlayer === "white" ? "black" : "white",
 		gameHistory: newHistory,
-		currentHistoryIndex: newHistory.length - 1
+		currentHistoryIndex: newHistory.length - 1,
 	}
 }
 
+export const findMovingPiece = (
+	board: Board,
+	pieceName: PieceName,
+	target: Square,
+	fromFile?: string,
+	fromRank?: string,
+): Square | null => {
+	const validPieces = getSquareFromPieceType(
+		board,
+		[pieceName],
+		board.currentPlayer,
+	)
 
+	return (
+		validPieces.find((square) => {
+			if (
+				fromFile &&
+				fileDic[fromFile as keyof typeof fileDic] !== square.col
+			)
+				return false
+			if (fromRank && parseInt(fromRank) - 1 !== square.row) return false
+
+			const possible = getPossibleMoves(square, board)
+			return possible.some(
+				(m) => m.col === target.col && m.row === target.row,
+			)
+		}) ?? null
+	)
+}
 
 export const undoMove = (board: Board): Board => {
 	const newIndex = board.currentHistoryIndex - 1
@@ -151,7 +268,7 @@ export const undoMove = (board: Board): Board => {
 		return {
 			...chessBoard(),
 			gameHistory: board.gameHistory,
-			currentHistoryIndex: -1
+			currentHistoryIndex: -1,
 		}
 	}
 
@@ -159,7 +276,7 @@ export const undoMove = (board: Board): Board => {
 	return {
 		...previousEntry.board,
 		gameHistory: board.gameHistory,
-		currentHistoryIndex: newIndex
+		currentHistoryIndex: newIndex,
 	}
 }
 
@@ -171,6 +288,6 @@ export const redoMove = (board: Board): Board => {
 	return {
 		...nextEntry.board,
 		gameHistory: board.gameHistory,
-		currentHistoryIndex: newIndex
+		currentHistoryIndex: newIndex,
 	}
 }

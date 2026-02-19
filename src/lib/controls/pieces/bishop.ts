@@ -1,7 +1,11 @@
 import { Board, Color, Piece, Square } from "@/lib/types/main"
 import { getStraightMovesInDirection } from "../board/moves"
 
-export const getPossibleBishopMoves = (from: Square, piece: Piece, board: Board): Square[] => {
+export const getPossibleBishopMoves = (
+	from: Square,
+	piece: Piece,
+	board: Board,
+): Square[] => {
 	const { color } = piece
 	const directions = [
 		{ col: 1, row: 1 }, // up-right
@@ -10,7 +14,9 @@ export const getPossibleBishopMoves = (from: Square, piece: Piece, board: Board)
 		{ col: -1, row: -1 }, // down-left
 	]
 
-	return directions.flatMap(direction => getStraightMovesInDirection(from, direction, board, color))
+	return directions.flatMap((direction) =>
+		getStraightMovesInDirection(from, direction, board, color),
+	)
 }
 
 export const bishop = (color: Color): Piece => ({

@@ -10,7 +10,10 @@ export const pieceOrder: PieceName[] = [
 	"pawn",
 ]
 
-export const offsetSpriteSheet = (pieceName: PieceName, spriteSheet: string) => {
+export const offsetSpriteSheet = (
+	pieceName: PieceName,
+	spriteSheet: string,
+) => {
 	const index = pieceOrder.indexOf(pieceName)
 	if (index === -1) return {}
 

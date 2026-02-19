@@ -8,7 +8,13 @@ import {
 	PromotionMove,
 } from "@/lib/types/main"
 import { chessBoard } from "@/lib/controls/board/chess-board"
-import { getPossibleMoves, movePiece, redoMove, undoMove } from "../controls/board/moves"
+import {
+	getPossibleMoves,
+	movePiece,
+	redoMove,
+	undoMove,
+	createPromotionMove,
+} from "../controls/board/moves"
 import { pieces } from "../controls/pieces"
 import { isCheckedMate, checkGameStatus } from "../controls/board/conditions"
 
@@ -64,13 +70,12 @@ const useChessboard = create<BoardState>((set, get) => ({
 
 		if (!from || !to || !piece) return
 
-		const promotionMove: PromotionMove = {
-			type: "promotion",
+		const promotionMove = createPromotionMove(
 			from,
 			to,
-			promotionTo: pieces[promotionTo](piece.color),
-			capturedPiece: state.currentPieces[to.row][to.col] || undefined,
-		}
+			pieces[promotionTo](piece.color),
+			state.currentPieces[to.row][to.col] || undefined,
+		)
 		set((state) => {
 			const nextBoard = movePiece(state, promotionMove)
 			const gameStatus = checkGameStatus(nextBoard)
