@@ -6,11 +6,20 @@ import type {
 	PieceMove,
 } from "@/lib/types/main"
 import { chessBoard } from "@/lib/controls/board/chess-board"
-import { movePiece, findMovingPiece } from "@/lib/controls/board/moves"
-import { getPieceAt } from "@/lib/controls/board/utils"
+import {
+	movePiece,
+	findMovingPiece,
+	getCandidateSquares,
+} from "@/lib/controls/board/moves"
+import { getPieceAt, getSquareFromPieceType } from "@/lib/controls/board/utils"
+import {
+	isChecked,
+	isCheckedMate,
+	areSameSquare,
+} from "@/lib/controls/board/conditions"
 import { pieces } from "../controls/pieces"
 import { getMoveType } from "@/lib/controls/board/special-move-conditions"
-import { pieceDic } from "@/lib/utils/dictionaries"
+import { pieceDic, sanPieceDic } from "@/lib/utils/dictionaries"
 import {
 	createCastlingMove,
 	createPromotionMove,
@@ -37,7 +46,15 @@ hxg5 29.b3 Ke6 30.a3 Kd6 31.axb4 cxb4 32.Ra5 Nd5 33.f3 Bc8 34.Kf2 Bf5
 35.Ra7 g6 36.Ra6+ Kc5 37.Ke1 Nf4 38.g3 Nxh3 39.Kd2 Kb5 40.Rd6 Kc5 41.Ra6
 Nf2 42.g4 Bd3 43.Re6 1/2-1/2`
 
-export const PGNToJSON = (PGNString: string) => {
+const getSquareFromAlgebraic = (algebraic: string): Square => {
+	const col = algebraic.charCodeAt(0) - "a".charCodeAt(0)
+	const row = parseInt(algebraic[1]) - 1
+	return { col, row }
+}
+
+const getAlgebraicFromSquare = (square: Square): string =>
+	String.fromCharCode("a".charCodeAt(0) + square.col) + (square.row + 1)
+export const getJSONFromPGN = (PGNString: string) => {
 	const matches = [...PGNString.matchAll(pgnRegex)]
 
 	const metadata: Record<string, string> = {}
@@ -78,9 +95,7 @@ const getMoveFromSAN = (board: Board, moveString: string): Move | null => {
 	const targetSquareStr = match[4]
 	const promotionStr = match[5]
 
-	const targetCol = targetSquareStr.charCodeAt(0) - "a".charCodeAt(0)
-	const targetRow = parseInt(targetSquareStr[1]) - 1
-	const target: Square = { col: targetCol, row: targetRow }
+	const target = getSquareFromAlgebraic(targetSquareStr)
 
 	const pieceName = pieceDic[(pieceChar ?? "") as keyof typeof pieceDic]
 	const from = findMovingPiece(board, pieceName, target, fromFile, fromRank)
@@ -119,3 +134,72 @@ export const createBoardFromPGN = (pgn: PGNObject): Board =>
 		}
 		return board
 	}, chessBoard())
+
+const getDisambiguation = (
+	board: Board,
+	pieceName: PieceName,
+	from: Square,
+	to: Square,
+): string => {
+	if (pieceName === "pawn") return ""
+
+	const samePieces = getCandidateSquares(board, pieceName, to).filter(
+		(sq) => !areSameSquare(sq, from),
+	)
+
+	if (samePieces.length === 0) return ""
+
+	const sameFile = samePieces.some((sq) => sq.col === from.col)
+	const sameRank = samePieces.some((sq) => sq.row === from.row)
+
+	if (!sameFile) return String.fromCharCode("a".charCodeAt(0) + from.col)
+	if (!sameRank) return String(from.row + 1)
+	return getAlgebraicFromSquare(from)
+}
+
+const getCheckSuffix = (boardAfterMove: Board): string => {
+	if (isCheckedMate(boardAfterMove)) return "#"
+	if (isChecked(boardAfterMove)) return "+"
+	return ""
+}
+
+export const getSANFromMove = (board: Board, move: Move): string => {
+	const boardAfterMove = movePiece(board, move)
+	const suffix = getCheckSuffix(boardAfterMove)
+
+	if (move.type === "castling") {
+		const isKingside = move.rookMove.from.col === 7
+		return (isKingside ? "O-O" : "O-O-O") + suffix
+	}
+
+	const { from, to } = move
+	const piece = getPieceAt(from, board)
+	if (!piece) return ""
+
+	const isCapture =
+		move.type === "enPassant" ||
+		("capturedPiece" in move && move.capturedPiece !== undefined)
+	const target = getAlgebraicFromSquare(to)
+
+	if (
+		move.type === "promotion" ||
+		move.type === "enPassant" ||
+		piece.name === "pawn"
+	) {
+		const fileStr = isCapture
+			? String.fromCharCode("a".charCodeAt(0) + from.col) + "x"
+			: ""
+		const promotionStr =
+			move.type === "promotion"
+				? "=" + sanPieceDic[move.promotionTo.name]
+				: ""
+
+		return fileStr + target + promotionStr + suffix
+	}
+
+	const pieceChar = sanPieceDic[piece.name]
+	const disambiguation = getDisambiguation(board, piece.name, from, to)
+	const captureStr = isCapture ? "x" : ""
+
+	return pieceChar + disambiguation + captureStr + target + suffix
+}

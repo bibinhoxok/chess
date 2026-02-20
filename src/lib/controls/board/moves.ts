@@ -175,7 +175,7 @@ export const createRegularMove = (
 	}
 }
 
-const regularMove = (board: Board, move: RegularMove): Board => ({
+const getBoardAfterRegularMove = (board: Board, move: RegularMove): Board => ({
 	...board,
 	currentPieces: createNewCurrentPieces(board, [move]),
 	capturedPieces: move?.capturedPiece
@@ -183,14 +183,14 @@ const regularMove = (board: Board, move: RegularMove): Board => ({
 		: board.capturedPieces,
 })
 
-const promotionMove = (board: Board, move: PromotionMove): Board => ({
+const getBoardAfterPromotionMove = (board: Board, move: PromotionMove): Board => ({
 	...board,
 	currentPieces: createNewCurrentPieces(board, [move], move.promotionTo),
 	capturedPieces: move?.capturedPiece
 		? [...board.capturedPieces, move?.capturedPiece]
 		: board.capturedPieces,
 })
-const castlingMove = (board: Board, move: CastlingMove): Board => ({
+const getBoardAfterCastlingMove = (board: Board, move: CastlingMove): Board => ({
 	...board,
 	currentPieces: createNewCurrentPieces(board, [
 		move.kingMove,
@@ -198,7 +198,7 @@ const castlingMove = (board: Board, move: CastlingMove): Board => ({
 	]),
 })
 
-const enPassantMove = (board: Board, move: EnPassantMove): Board => ({
+const getBoardAfterEnPassantMove = (board: Board, move: EnPassantMove): Board => ({
 	...board,
 	// Move the pawn to the captured square to remove the enemy piece, then move to the final destination
 	currentPieces: createNewCurrentPieces(board, [
@@ -213,10 +213,10 @@ const enPassantMove = (board: Board, move: EnPassantMove): Board => ({
 
 export const movePiece = (board: Board, move: Move): Board => {
 	const moves = {
-		regular: () => regularMove(board, move as RegularMove),
-		promotion: () => promotionMove(board, move as PromotionMove),
-		castling: () => castlingMove(board, move as CastlingMove),
-		enPassant: () => enPassantMove(board, move as EnPassantMove),
+		regular: () => getBoardAfterRegularMove(board, move as RegularMove),
+		promotion: () => getBoardAfterPromotionMove(board, move as PromotionMove),
+		castling: () => getBoardAfterCastlingMove(board, move as CastlingMove),
+		enPassant: () => getBoardAfterEnPassantMove(board, move as EnPassantMove),
 	}
 	const nextBoardState = moves[move.type]()
 	const newHistory = board.gameHistory.slice(0, board.currentHistoryIndex + 1)
@@ -230,6 +230,25 @@ export const movePiece = (board: Board, move: Move): Board => {
 	}
 }
 
+export const getCandidateSquares = (
+	board: Board,
+	pieceName: PieceName,
+	target: Square,
+): Square[] => {
+	const validPieces = getSquareFromPieceType(
+		board,
+		[pieceName],
+		board.currentPlayer,
+	)
+
+	return validPieces.filter((square) => {
+		const possible = getPossibleMoves(square, board)
+		return possible.some(
+			(m) => m.col === target.col && m.row === target.row,
+		)
+	})
+}
+
 export const findMovingPiece = (
 	board: Board,
 	pieceName: PieceName,
@@ -237,25 +256,17 @@ export const findMovingPiece = (
 	fromFile?: string,
 	fromRank?: string,
 ): Square | null => {
-	const validPieces = getSquareFromPieceType(
-		board,
-		[pieceName],
-		board.currentPlayer,
-	)
+	const candidates = getCandidateSquares(board, pieceName, target)
 
 	return (
-		validPieces.find((square) => {
+		candidates.find((square) => {
 			if (
 				fromFile &&
 				fileDic[fromFile as keyof typeof fileDic] !== square.col
 			)
 				return false
 			if (fromRank && parseInt(fromRank) - 1 !== square.row) return false
-
-			const possible = getPossibleMoves(square, board)
-			return possible.some(
-				(m) => m.col === target.col && m.row === target.row,
-			)
+			return true
 		}) ?? null
 	)
 }

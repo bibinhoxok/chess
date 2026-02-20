@@ -1,12 +1,21 @@
 import type { PieceName } from "@/lib/types/main"
 
-export const pieceDic = {
-	K: "king" as PieceName,
-	Q: "queen" as PieceName,
-	R: "rook" as PieceName,
-	B: "bishop" as PieceName,
-	N: "knight" as PieceName,
-	"": "pawn" as PieceName,
+export const pieceDic: Record<string, PieceName> = {
+	K: "king",
+	Q: "queen",
+	R: "rook",
+	B: "bishop",
+	N: "knight",
+	"": "pawn",
+} as const
+
+export const sanPieceDic: Record<PieceName, string> = {
+	king: "K",
+	queen: "Q",
+	rook: "R",
+	bishop: "B",
+	knight: "N",
+	pawn: "",
 } as const
 
 export const fileDic = {
