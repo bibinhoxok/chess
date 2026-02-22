@@ -103,11 +103,11 @@ const Chessboard = ({ scale }: { scale: number }) => {
 		const squares =
 			lastMove.type === "castling"
 				? [
-						lastMove.kingMove.from,
-						lastMove.kingMove.to,
-						lastMove.rookMove.from,
-						lastMove.rookMove.to,
-					]
+					lastMove.kingMove.from,
+					lastMove.kingMove.to,
+					lastMove.rookMove.from,
+					lastMove.rookMove.to,
+				]
 				: [lastMove.from, lastMove.to]
 		return new Set(squares.map((s) => s.row * 8 + s.col))
 	}, [gameHistory])
@@ -215,7 +215,7 @@ const Chessboard = ({ scale }: { scale: number }) => {
 							duration: 0.5,
 						}}
 						ref={boardRef}
-						className="relative bg-[length:100%_100%] [image-rendering:pixelated]"
+						className="relative bg-size-[100%_100%] pixelated"
 						style={{
 							backgroundImage: `url(${ASSETS.boards.purple})`,
 							width: `${boardScale.scaledBoardImageSize}px`,
