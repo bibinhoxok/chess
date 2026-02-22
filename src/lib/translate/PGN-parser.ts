@@ -4,6 +4,8 @@ import type {
 	Square,
 	Move,
 	PieceMove,
+	GameStatus,
+	Color,
 } from "@/lib/types/main"
 import { chessBoard } from "@/lib/controls/board/chess-board"
 import {
@@ -202,4 +204,43 @@ export const getSANFromMove = (board: Board, move: Move): string => {
 	const captureStr = isCapture ? "x" : ""
 
 	return pieceChar + disambiguation + captureStr + target + suffix
+}
+
+export const getResultSAN = (gameStatus: GameStatus, currentPlayer: Color): string => {
+	switch (gameStatus) {
+		case "checkmate":
+			return currentPlayer === "white" ? "0-1" : "1-0"
+		case "stalemate":
+		case "insufficient material":
+			return "1/2-1/2"
+		default:
+			return "*"
+	}
+}
+
+export const createPGNFromBoard = (
+	board: Board,
+	metadata: Record<string, string> = {},
+): string => {
+	const calculatedResult = getResultSAN(board.gameStatus, board.currentPlayer)
+
+	const meta = {
+		Result: calculatedResult,
+		...metadata,
+	}
+
+	const headers = Object.entries(meta)
+		.map(([key, value]) => `[${key} "${value}"]`)
+		.join("\n")
+
+	const moves = board.gameHistory
+		.map((history, i) => {
+			const prevBoard =
+				i === 0 ? chessBoard() : board.gameHistory[i - 1].board
+			const san = getSANFromMove(prevBoard, history.move)
+			return i % 2 === 0 ? `${Math.floor(i / 2) + 1}.${san}` : san
+		})
+		.join(" ")
+
+	return `${headers}\n\n${moves} ${meta.Result}`
 }
