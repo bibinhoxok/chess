@@ -21,7 +21,7 @@ import { getPossibleBishopMoves } from "../pieces/bishop"
 import { getPossibleKingMoves } from "../pieces/king"
 import { getPossibleQueenMoves } from "../pieces/queen"
 import { pieces } from "../pieces"
-import { fileDic } from "@/lib/utils/dictionaries"
+
 
 export const getStraightMovesInDirection = (
 	from: Square,
@@ -262,7 +262,7 @@ export const findMovingPiece = (
 		candidates.find((square) => {
 			if (
 				fromFile &&
-				fileDic[fromFile as keyof typeof fileDic] !== square.col
+				(fromFile.charCodeAt(0) - "a".charCodeAt(0)) !== square.col
 			)
 				return false
 			if (fromRank && parseInt(fromRank) - 1 !== square.row) return false

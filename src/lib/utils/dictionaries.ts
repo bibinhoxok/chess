@@ -18,13 +18,4 @@ export const sanPieceDic: Record<PieceName, string> = {
 	pawn: "",
 } as const
 
-export const fileDic = {
-	a: 0,
-	b: 1,
-	c: 2,
-	d: 3,
-	e: 4,
-	f: 5,
-	g: 6,
-	h: 7,
-} as const
+
